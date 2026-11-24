@@ -1,0 +1,60 @@
+name: APK derle
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.24.5
+          cache: true
+
+      - name: Android dosyalarını oluştur
+        run: flutter create --org com.greenlife --project-name green_life --platforms=android .
+
+      - name: Alarm / izin ayarlarını ekle
+        run: python3 tool/patch_android.py
+
+      - run: flutter pub get
+
+      - name: Testler
+        run: flutter test
+
+      - name: APK derle
+        env:
+          PLANTNET_KEY: ${{ secrets.PLANTNET_KEY }}
+          PERENUAL_KEY: ${{ secrets.PERENUAL_KEY }}
+        run: |
+          flutter build apk --release \
+            --dart-define=PLANTNET_KEY="$PLANTNET_KEY" \
+            --dart-define=PERENUAL_KEY="$PERENUAL_KEY"
+          cp build/app/outputs/flutter-apk/app-release.apk GreenLife.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GreenLife-apk
+          path: GreenLife.apk
+
+      - name: İndirme sayfası (Release)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: deneme-${{ github.run_number }}
+          name: Green Life deneme ${{ github.run_number }}
+          body: Telefona indirip kur. Bilinmeyen kaynaklardan yüklemeye izin vermen gerekebilir.
+          files: GreenLife.apk
