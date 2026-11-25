@@ -27,7 +27,7 @@ SPECIES = [
     ("pilea", "Pilea peperomioides"),
 ]
 OK = {"cc0", "cc-by", "cc-by-sa"}
-PER_SPECIES = 4
+PER_SPECIES = 6
 OUT = pathlib.Path("design-assets/photos")
 OUT.mkdir(parents=True, exist_ok=True)
 H = {"User-Agent": "GreenLife-design (github.com/Murtix321/green-life)"}
@@ -46,7 +46,18 @@ for slug, name in SPECIES:
         taxon = next((t for t in res if t["name"].lower() == name.lower()), res[0])
         full = get_json(f"https://api.inaturalist.org/v1/taxa/{taxon['id']}?locale=tr")["results"][0]
         photos = [tp["photo"] for tp in full.get("taxon_photos", [])]
-        good = [p for p in photos if (p.get("license_code") or "").lower() in OK]
+        # Evde/saksıda yetiştirilen (captive) gözlemler: gerçek ev bitkisi görüntüsü
+        oq = urllib.parse.urlencode({
+            "taxon_id": taxon["id"], "captive": "true", "photo_license": "cc0,cc-by,cc-by-sa",
+            "order_by": "votes", "per_page": 12, "photos": "true",
+        })
+        for o in get_json(f"https://api.inaturalist.org/v1/observations?{oq}")["results"]:
+            photos.extend(o.get("photos", [])[:1])
+        seen, good = set(), []
+        for p in photos:
+            if (p.get("license_code") or "").lower() in OK and p["id"] not in seen:
+                seen.add(p["id"])
+                good.append(p)
         print(f"{name}: {len(photos)} foto, {len(good)} serbest lisanslı")
         for i, p in enumerate(good[:PER_SPECIES]):
             url = p["url"].replace("/square.", "/large.").replace("/medium.", "/large.")
