@@ -8,6 +8,94 @@
   "source": "https://www.inaturalist.org/photos/63451902"
  },
  {
+  "file": "monstera-2.jpg",
+  "species": "Monstera deliciosa",
+  "tr": "Deve Tabanı",
+  "attribution": "(c) Letizia Weichgrebe, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/111213052"
+ },
+ {
+  "file": "monstera-3.jpg",
+  "species": "Monstera deliciosa",
+  "tr": "Deve Tabanı",
+  "attribution": "(c) Robert Taylor, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/135050254"
+ },
+ {
+  "file": "monstera-4.jpg",
+  "species": "Monstera deliciosa",
+  "tr": "Deve Tabanı",
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/574224792"
+ },
+ {
+  "file": "monstera-5.jpg",
+  "species": "Monstera deliciosa",
+  "tr": "Deve Tabanı",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/656835125"
+ },
+ {
+  "file": "monstera-6.jpg",
+  "species": "Monstera deliciosa",
+  "tr": "Deve Tabanı",
+  "attribution": "(c) Ana Cristina Almeida, some rights reserved (CC BY-SA)",
+  "license": "cc-by-sa",
+  "source": "https://www.inaturalist.org/photos/273031006"
+ },
+ {
+  "file": "pasa-kilici-1.jpg",
+  "species": "Dracaena trifasciata",
+  "tr": "Yılansı Sivridil",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/698006029"
+ },
+ {
+  "file": "pasa-kilici-2.jpg",
+  "species": "Dracaena trifasciata",
+  "tr": "Yılansı Sivridil",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/529558766"
+ },
+ {
+  "file": "pasa-kilici-3.jpg",
+  "species": "Dracaena trifasciata",
+  "tr": "Yılansı Sivridil",
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/642629899"
+ },
+ {
+  "file": "pasa-kilici-4.jpg",
+  "species": "Dracaena trifasciata",
+  "tr": "Yılansı Sivridil",
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/47387295"
+ },
+ {
+  "file": "pasa-kilici-5.jpg",
+  "species": "Dracaena trifasciata",
+  "tr": "Yılansı Sivridil",
+  "attribution": "(c) Roman A. Lagazyuk (Роман А. Лагазюк), some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/477718195"
+ },
+ {
+  "file": "pasa-kilici-6.jpg",
+  "species": "Dracaena trifasciata",
+  "tr": "Yılansı Sivridil",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/482014259"
+ },
+ {
   "file": "baris-cicegi-1.jpg",
   "species": "Spathiphyllum",
   "tr": "Barış Çiçeği",
@@ -16,12 +104,92 @@
   "source": "https://www.inaturalist.org/photos/439386"
  },
  {
+  "file": "baris-cicegi-2.jpg",
+  "species": "Spathiphyllum",
+  "tr": "Barış Çiçeği",
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/641622833"
+ },
+ {
+  "file": "baris-cicegi-3.jpg",
+  "species": "Spathiphyllum",
+  "tr": "Barış Çiçeği",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/529273631"
+ },
+ {
+  "file": "baris-cicegi-4.jpg",
+  "species": "Spathiphyllum",
+  "tr": "Barış Çiçeği",
+  "attribution": "(c) Jagdish Supekar, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/29757892"
+ },
+ {
+  "file": "baris-cicegi-5.jpg",
+  "species": "Spathiphyllum",
+  "tr": "Barış Çiçeği",
+  "attribution": "(c) Ricard Busquets Reverte, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/252724431"
+ },
+ {
+  "file": "baris-cicegi-6.jpg",
+  "species": "Spathiphyllum",
+  "tr": "Barış Çiçeği",
+  "attribution": "(c) Gianni Del Bufalo bygdb, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/21843083"
+ },
+ {
   "file": "pothos-1.jpg",
   "species": "Epipremnum aureum",
   "tr": "Salon Sarmaşığı",
   "attribution": "(c) Forest and Kim Starr, some rights reserved (CC BY)",
   "license": "cc-by",
   "source": "https://www.inaturalist.org/photos/173606526"
+ },
+ {
+  "file": "pothos-2.jpg",
+  "species": "Epipremnum aureum",
+  "tr": "Salon Sarmaşığı",
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/527138855"
+ },
+ {
+  "file": "pothos-3.jpg",
+  "species": "Epipremnum aureum",
+  "tr": "Salon Sarmaşığı",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/558087330"
+ },
+ {
+  "file": "pothos-4.jpg",
+  "species": "Epipremnum aureum",
+  "tr": "Salon Sarmaşığı",
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/366883027"
+ },
+ {
+  "file": "pothos-5.jpg",
+  "species": "Epipremnum aureum",
+  "tr": "Salon Sarmaşığı",
+  "attribution": "(c) Ben Machado, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/79952663"
+ },
+ {
+  "file": "pothos-6.jpg",
+  "species": "Epipremnum aureum",
+  "tr": "Salon Sarmaşığı",
+  "attribution": "(c) Christine Loew, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/93521716"
  },
  {
   "file": "kaucuk-1.jpg",
@@ -40,6 +208,86 @@
   "source": "https://www.inaturalist.org/photos/1481351"
  },
  {
+  "file": "kaucuk-3.jpg",
+  "species": "Ficus elastica",
+  "tr": "Kauçuk",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/597330554"
+ },
+ {
+  "file": "kaucuk-4.jpg",
+  "species": "Ficus elastica",
+  "tr": "Kauçuk",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/663425016"
+ },
+ {
+  "file": "kaucuk-5.jpg",
+  "species": "Ficus elastica",
+  "tr": "Kauçuk",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/588477913"
+ },
+ {
+  "file": "kaucuk-6.jpg",
+  "species": "Ficus elastica",
+  "tr": "Kauçuk",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/558090466"
+ },
+ {
+  "file": "keman-yaprakli-incir-1.jpg",
+  "species": "Ficus lyrata",
+  "tr": "Keman Yapraklı Kauçuk",
+  "attribution": "(c) Juan Carlos Caicedo Hernández, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/251355327"
+ },
+ {
+  "file": "keman-yaprakli-incir-2.jpg",
+  "species": "Ficus lyrata",
+  "tr": "Keman Yapraklı Kauçuk",
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/641632070"
+ },
+ {
+  "file": "keman-yaprakli-incir-3.jpg",
+  "species": "Ficus lyrata",
+  "tr": "Keman Yapraklı Kauçuk",
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/236975769"
+ },
+ {
+  "file": "keman-yaprakli-incir-4.jpg",
+  "species": "Ficus lyrata",
+  "tr": "Keman Yapraklı Kauçuk",
+  "attribution": "(c) Marc Riera, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/181047798"
+ },
+ {
+  "file": "keman-yaprakli-incir-5.jpg",
+  "species": "Ficus lyrata",
+  "tr": "Keman Yapraklı Kauçuk",
+  "attribution": "(c) Dairon Cuevas Riveras, some rights reserved (CC BY-SA)",
+  "license": "cc-by-sa",
+  "source": "https://www.inaturalist.org/photos/590994177"
+ },
+ {
+  "file": "keman-yaprakli-incir-6.jpg",
+  "species": "Ficus lyrata",
+  "tr": "Keman Yapraklı Kauçuk",
+  "attribution": "(c) Ong Jyh Seng, some rights reserved (CC BY-SA)",
+  "license": "cc-by-sa",
+  "source": "https://www.inaturalist.org/photos/21532756"
+ },
+ {
   "file": "orkide-1.jpg",
   "species": "Phalaenopsis",
   "tr": null,
@@ -56,6 +304,38 @@
   "source": "https://www.inaturalist.org/photos/385082339"
  },
  {
+  "file": "orkide-3.jpg",
+  "species": "Phalaenopsis",
+  "tr": null,
+  "attribution": "(c) alan_lagos, some rights reserved (CC BY-SA)",
+  "license": "cc-by-sa",
+  "source": "https://www.inaturalist.org/photos/35413220"
+ },
+ {
+  "file": "orkide-4.jpg",
+  "species": "Phalaenopsis",
+  "tr": null,
+  "attribution": "(c) Greg III Espera, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/182677496"
+ },
+ {
+  "file": "orkide-5.jpg",
+  "species": "Phalaenopsis",
+  "tr": null,
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/729307964"
+ },
+ {
+  "file": "orkide-6.jpg",
+  "species": "Phalaenopsis",
+  "tr": null,
+  "attribution": "(c) Lexi Amico, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/541000904"
+ },
+ {
   "file": "zamia-1.jpg",
   "species": "Zamioculcas zamiifolia",
   "tr": "Zeze Bitkisi",
@@ -64,12 +344,76 @@
   "source": "https://www.inaturalist.org/photos/71025046"
  },
  {
+  "file": "zamia-2.jpg",
+  "species": "Zamioculcas zamiifolia",
+  "tr": "Zeze Bitkisi",
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/574806460"
+ },
+ {
+  "file": "zamia-3.jpg",
+  "species": "Zamioculcas zamiifolia",
+  "tr": "Zeze Bitkisi",
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/509141900"
+ },
+ {
+  "file": "zamia-4.jpg",
+  "species": "Zamioculcas zamiifolia",
+  "tr": "Zeze Bitkisi",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/727661949"
+ },
+ {
+  "file": "zamia-5.jpg",
+  "species": "Zamioculcas zamiifolia",
+  "tr": "Zeze Bitkisi",
+  "attribution": "(c) Gianni Del Bufalo bygdb, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/21774503"
+ },
+ {
+  "file": "zamia-6.jpg",
+  "species": "Zamioculcas zamiifolia",
+  "tr": "Zeze Bitkisi",
+  "attribution": "(c) Gianni Del Bufalo bygdb, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/114821297"
+ },
+ {
   "file": "dua-cicegi-1.jpg",
   "species": "Goeppertia orbifolia",
   "tr": null,
   "attribution": "(c) Greg III Espera, some rights reserved (CC BY), uploaded by Greg III Espera",
   "license": "cc-by",
   "source": "https://www.inaturalist.org/photos/205975491"
+ },
+ {
+  "file": "dua-cicegi-2.jpg",
+  "species": "Goeppertia orbifolia",
+  "tr": null,
+  "attribution": "(c) Wesley Webb, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/181106495"
+ },
+ {
+  "file": "dua-cicegi-3.jpg",
+  "species": "Goeppertia orbifolia",
+  "tr": null,
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/363338364"
+ },
+ {
+  "file": "dua-cicegi-4.jpg",
+  "species": "Goeppertia orbifolia",
+  "tr": null,
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/564521845"
  },
  {
   "file": "lavanta-1.jpg",
@@ -88,12 +432,84 @@
   "source": "https://www.inaturalist.org/photos/2697773"
  },
  {
+  "file": "lavanta-3.jpg",
+  "species": "Lavandula angustifolia",
+  "tr": "Lavanta",
+  "attribution": "(c) Kevin, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/569142194"
+ },
+ {
+  "file": "lavanta-4.jpg",
+  "species": "Lavandula angustifolia",
+  "tr": "Lavanta",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/533146754"
+ },
+ {
+  "file": "lavanta-5.jpg",
+  "species": "Lavandula angustifolia",
+  "tr": "Lavanta",
+  "attribution": "(c) Harshjeet Singh Bal, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/65592076"
+ },
+ {
+  "file": "lavanta-6.jpg",
+  "species": "Lavandula angustifolia",
+  "tr": "Lavanta",
+  "attribution": "(c) Vasileia Sef, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/351143352"
+ },
+ {
   "file": "aloe-1.jpg",
   "species": "Aloe vera",
   "tr": "Tıbbi sarısabır",
   "attribution": "(c) Forest and Kim Starr, some rights reserved (CC BY)",
   "license": "cc-by",
   "source": "https://www.inaturalist.org/photos/759770213"
+ },
+ {
+  "file": "aloe-2.jpg",
+  "species": "Aloe vera",
+  "tr": "Tıbbi sarısabır",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/506783108"
+ },
+ {
+  "file": "aloe-3.jpg",
+  "species": "Aloe vera",
+  "tr": "Tıbbi sarısabır",
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/515723165"
+ },
+ {
+  "file": "aloe-4.jpg",
+  "species": "Aloe vera",
+  "tr": "Tıbbi sarısabır",
+  "attribution": "(c) Zac Peterson, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/295223934"
+ },
+ {
+  "file": "aloe-5.jpg",
+  "species": "Aloe vera",
+  "tr": "Tıbbi sarısabır",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/662108340"
+ },
+ {
+  "file": "aloe-6.jpg",
+  "species": "Aloe vera",
+  "tr": "Tıbbi sarısabır",
+  "attribution": "(c) Gianni Del Bufalo bygdb, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/615742063"
  },
  {
   "file": "kurdele-1.jpg",
@@ -110,6 +526,86 @@
   "attribution": "(c) Sofia Zvolanek, some rights reserved (CC BY), uploaded by Sofia Zvolanek",
   "license": "cc-by",
   "source": "https://www.inaturalist.org/photos/559715472"
+ },
+ {
+  "file": "kurdele-3.jpg",
+  "species": "Chlorophytum comosum",
+  "tr": "Kurdele Çiçeği",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/679783461"
+ },
+ {
+  "file": "kurdele-4.jpg",
+  "species": "Chlorophytum comosum",
+  "tr": "Kurdele Çiçeği",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/586015907"
+ },
+ {
+  "file": "kurdele-5.jpg",
+  "species": "Chlorophytum comosum",
+  "tr": "Kurdele Çiçeği",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/568350123"
+ },
+ {
+  "file": "kurdele-6.jpg",
+  "species": "Chlorophytum comosum",
+  "tr": "Kurdele Çiçeği",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/460274304"
+ },
+ {
+  "file": "antoryum-1.jpg",
+  "species": "Anthurium andraeanum",
+  "tr": "Flamingo Çiçeği",
+  "attribution": "(c) Juan Carlos Caicedo Hernández, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/253254407"
+ },
+ {
+  "file": "antoryum-2.jpg",
+  "species": "Anthurium andraeanum",
+  "tr": "Flamingo Çiçeği",
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/574806257"
+ },
+ {
+  "file": "antoryum-3.jpg",
+  "species": "Anthurium andraeanum",
+  "tr": "Flamingo Çiçeği",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/669485821"
+ },
+ {
+  "file": "antoryum-4.jpg",
+  "species": "Anthurium andraeanum",
+  "tr": "Flamingo Çiçeği",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/571290957"
+ },
+ {
+  "file": "antoryum-5.jpg",
+  "species": "Anthurium andraeanum",
+  "tr": "Flamingo Çiçeği",
+  "attribution": "(c) Gianni Del Bufalo bygdb, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/26993302"
+ },
+ {
+  "file": "antoryum-6.jpg",
+  "species": "Anthurium andraeanum",
+  "tr": "Flamingo Çiçeği",
+  "attribution": "(c) zebedeugalinha, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/473864234"
  },
  {
   "file": "begonya-1.jpg",
@@ -134,5 +630,77 @@
   "attribution": "(c) Victor Farjalla Pontes, some rights reserved (CC BY), uploaded by Victor Farjalla Pontes",
   "license": "cc-by",
   "source": "https://www.inaturalist.org/photos/127205711"
+ },
+ {
+  "file": "begonya-4.jpg",
+  "species": "Begonia maculata",
+  "tr": "Çilli Begonya",
+  "attribution": "(c) Maike Letícia Link Bianchini, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/337728558"
+ },
+ {
+  "file": "begonya-5.jpg",
+  "species": "Begonia maculata",
+  "tr": "Çilli Begonya",
+  "attribution": "(c) rafa perazzolo, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/397833578"
+ },
+ {
+  "file": "begonya-6.jpg",
+  "species": "Begonia maculata",
+  "tr": "Çilli Begonya",
+  "attribution": "(c) Robert Guralnick, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/435586878"
+ },
+ {
+  "file": "pilea-1.jpg",
+  "species": "Pilea peperomioides",
+  "tr": "Çin Para Çiçeği",
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/655954538"
+ },
+ {
+  "file": "pilea-2.jpg",
+  "species": "Pilea peperomioides",
+  "tr": "Çin Para Çiçeği",
+  "attribution": "(c) L. Eaton, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/706826704"
+ },
+ {
+  "file": "pilea-3.jpg",
+  "species": "Pilea peperomioides",
+  "tr": "Çin Para Çiçeği",
+  "attribution": "(c) petitcrabe, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/483510931"
+ },
+ {
+  "file": "pilea-4.jpg",
+  "species": "Pilea peperomioides",
+  "tr": "Çin Para Çiçeği",
+  "attribution": "no rights reserved",
+  "license": "cc0",
+  "source": "https://www.inaturalist.org/photos/626650128"
+ },
+ {
+  "file": "pilea-5.jpg",
+  "species": "Pilea peperomioides",
+  "tr": "Çin Para Çiçeği",
+  "attribution": "(c) Dagmar Gleiss, some rights reserved (CC BY-SA)",
+  "license": "cc-by-sa",
+  "source": "https://www.inaturalist.org/photos/463958218"
+ },
+ {
+  "file": "pilea-6.jpg",
+  "species": "Pilea peperomioides",
+  "tr": "Çin Para Çiçeği",
+  "attribution": "(c) Oleksandr Shynder, some rights reserved (CC BY)",
+  "license": "cc-by",
+  "source": "https://www.inaturalist.org/photos/755993598"
  }
 ]
