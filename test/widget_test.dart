@@ -197,6 +197,8 @@ void main() {
       await _go(t, 1200);
       expect(find.text('ayse@ornek.com'), findsOneWidget);
       await t.scrollUntilVisible(find.byKey(const ValueKey('sign-out')), 200, scrollable: find.byType(Scrollable).last);
+      await t.drag(find.byType(Scrollable).last, const Offset(0, -400));
+      await _go(t, 500);
       await t.tap(find.byKey(const ValueKey('sign-out')));
       await _go(t, 1500);
       expect(store.signedIn, isFalse);
@@ -228,7 +230,7 @@ void main() {
       expect(find.textContaining('Sulandı'), findsWidgets);
 
       await t.tap(find.byKey(const ValueKey('open-growth')));
-      await _go(t, 1200);
+      await _go(t, 2600);
       expect(find.text('Büyüme günlüğü'), findsOneWidget);
       expect(find.text('33 cm'), findsOneWidget);
 
