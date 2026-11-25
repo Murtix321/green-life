@@ -54,7 +54,7 @@ void main() {
     await t.tap(find.byKey(const ValueKey('log-water')));
     await wait(t, 1200);
     await shot(t, '06-detay-sulandi');
-    await t.tap(find.byTooltip('Geri'));
+    await t.binding.handlePopRoute();
     await wait(t, 1500);
 
     // Paşa kılıcının büyüme günlüğü (gerçek fotoğraflar)
@@ -68,9 +68,9 @@ void main() {
     await t.tap(find.text('Gün 1').first);
     await wait(t, 1800);
     await shot(t, '08-buyume-gun1');
-    await t.tap(find.byTooltip('Geri'));
+    await t.binding.handlePopRoute();
     await wait(t, 1200);
-    await t.tap(find.byTooltip('Geri'));
+    await t.binding.handlePopRoute();
     await wait(t, 1500);
 
     // Bakım

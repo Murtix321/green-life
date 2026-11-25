@@ -267,7 +267,7 @@ class _GrowthScreenState extends State<GrowthScreen> {
                   Expanded(
                     child: GreenButton(
                       key: const ValueKey('add-photo'),
-                      label: 'Bugünün fotoğrafı',
+                      label: 'Fotoğraf ekle',
                       icon: Icons.photo_camera_rounded,
                       onTap: () => _addPhoto(p),
                     ),

@@ -18,7 +18,7 @@ class WeatherNow {
     if (humidity < 35) {
       return 'Hava kuru (nem %$humidity): Monstera, Kalatya gibi tropikal bitkilerin yapraklarına su püskürt.';
     }
-    if (tMax <= 5) {
+    if (tMax <= 10) {
       return 'Hava soğuk (${tMax.round()}°): bitkileri soğuk cam ve kapı aralıklarından uzak tut, sulamayı azalt.';
     }
     if (humidity > 80) {
