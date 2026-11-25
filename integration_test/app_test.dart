@@ -60,6 +60,8 @@ void main() {
     // Paşa kılıcının büyüme günlüğü (gerçek fotoğraflar)
     await t.tap(find.text('Paşa Kılıcı').first);
     await wait(t, 2000);
+    await t.ensureVisible(find.byKey(const ValueKey('open-growth')));
+    await wait(t, 600);
     await t.tap(find.byKey(const ValueKey('open-growth')));
     await wait(t, 2500);
     await shot(t, '07-buyume-gun240');

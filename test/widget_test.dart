@@ -229,7 +229,9 @@ void main() {
       expect(store.byId('ornek-baris')!.wateredToday, isTrue);
       expect(find.textContaining('Sulandı'), findsWidgets);
 
-      await t.tap(find.byKey(const ValueKey('open-growth')));
+      await t.ensureVisible(find.byKey(const ValueKey('open-growth')));
+    await _go(t, 600);
+    await t.tap(find.byKey(const ValueKey('open-growth')));
       await _go(t, 2600);
       expect(find.text('Büyüme günlüğü'), findsOneWidget);
       expect(find.text('33 cm'), findsOneWidget);
