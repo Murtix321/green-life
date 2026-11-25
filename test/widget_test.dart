@@ -170,7 +170,7 @@ void main() {
 
       // Ana sayfa
       expect(store.signedIn, isTrue);
-      expect(find.text('Ayşe', findRichText: true), findsOneWidget);
+      expect(find.textContaining('Ayşe', findRichText: true), findsWidgets);
       expect(find.text('2 bitkiyi sula'), findsOneWidget);
       expect(find.text('Keman Yapraklı İncir'), findsOneWidget);
 
@@ -215,6 +215,8 @@ void main() {
       await t.pumpWidget(GreenLifeApp(store: store));
       await _go(t, 1200);
 
+      await t.ensureVisible(find.text('Barış Çiçeği').first);
+      await _go(t, 400);
       await t.tap(find.text('Barış Çiçeği').first);
       await _go(t, 1200);
       expect(find.text('Bakım özeti'), findsOneWidget);

@@ -85,9 +85,10 @@ class _NavItem extends StatelessWidget {
         child: InkResponse(
           onTap: onTap,
           radius: 34,
-          child: SizedBox(
-            height: 50,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AnimatedScale(
@@ -98,6 +99,8 @@ class _NavItem extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 10.5, fontWeight: active ? FontWeight.w700 : FontWeight.w500, color: color)),
               ],
             ),

@@ -207,7 +207,12 @@ class _PlantCard extends StatelessWidget {
                   decoration: BoxDecoration(color: thirsty ? GL.warnDot : GL.green, shape: BoxShape.circle),
                 ),
                 const SizedBox(width: 5),
-                Text(p.statusLabel, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: thirsty ? GL.warn : GL.greenDark)),
+                Flexible(
+                  child: Text(p.statusLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: thirsty ? GL.warn : GL.greenDark)),
+                ),
               ],
             ),
           ],
