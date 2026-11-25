@@ -1,4 +1,4 @@
-# Green Life 🌿 (Flutter · Konsept 2 "Orman Sade")
+# Green Life 🌿 (Flutter · "Buzlu Cam" tasarımı)
 
 Ev bitkileri için: fotoğrafla tanıma, Türkçe bakım rehberi, sulama alarmları ve gün gün büyüme takibi.
 
@@ -106,15 +106,19 @@ Nasıl çalışıyor: önce Pl@ntNet bitkiyi tanır → sonuç `lib/data/care_db
 
 ## 5. Google ile giriş
 
-Firebase gerekmez, ama Google'a uygulamanı tanıtman lazım:
+GitHub'daki APK sabit bir test anahtarıyla imzalanır, bu yüzden parmak izi her sürümde aynıdır:
 
-1. https://console.cloud.google.com → yeni proje → **APIs & Services → OAuth consent screen** (External, uygulama adı "Green Life").
-2. **Credentials → Create credentials → OAuth client ID → Android**
-   - Package name: `com.greenlife.green_life`
-   - SHA-1: terminalde `cd android; ./gradlew signingReport` → "debug" altındaki SHA1.
-3. Kaydet. Birkaç dakika sonra "Google ile devam et" çalışır.
+```
+Paket adı : com.greenlife.green_life
+SHA-1     : AC:AD:5D:D9:CE:87:4F:89:2A:C0:72:1C:6E:E2:FB:E0:DE:18:18:0B
+```
 
-Yapılandırma yapılmadan basarsan uygulama nazikçe uyarır; bu sırada **E-posta ile giriş** ile devam edebilirsin (şimdilik hesap sadece telefonda tutulur).
+1. https://console.cloud.google.com → yeni proje ("Green Life").
+2. **APIs & Services → OAuth consent screen** → External → uygulama adı "Green Life", destek e-postası kendi adresin → kaydet. **Test users** kısmına kendi Gmail adresini ekle (ya da "Publish app").
+3. **Credentials → Create credentials → OAuth client ID → Android** → paket adı ve SHA-1'i yukarıdan yapıştır → Create.
+4. 5–10 dakika bekle, uygulamada "Google ile devam et"e bas.
+
+Kayıt yapılmadıysa uygulama çökmez; ne yapılacağını söyleyen bir uyarı ve "E-posta ile devam et" seçeneği gösterir.
 
 ## Ücretsiz veri kaynakları (public-apis listesinden)
 
