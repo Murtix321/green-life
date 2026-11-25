@@ -53,7 +53,7 @@ class AuthService {
 
   static Future<void> signOut() async {
     try {
-      await _google.signOut();
+      await _google.signOut().timeout(const Duration(seconds: 5));
     } catch (_) {}
   }
 }

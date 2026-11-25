@@ -140,8 +140,8 @@ class ProfileScreen extends StatelessWidget {
             radius: 18,
             padding: EdgeInsets.zero,
             onTap: () async {
-              await AuthService.signOut();
               await store.signOut();
+              AuthService.signOut();
             },
             child: const SizedBox(
               height: 50,
