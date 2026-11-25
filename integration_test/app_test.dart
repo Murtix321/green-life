@@ -93,7 +93,9 @@ void main() {
     await t.enterText(find.byKey(const ValueKey('add-search')), 'lavanta');
     await wait(t, 7000);
     await shot(t, '13-arama-lavanta');
-    await t.tapAt(const Offset(20, 60));
+    FocusManager.instance.primaryFocus?.unfocus();
+    await wait(t, 600);
+    await t.binding.handlePopRoute();
     await wait(t, 1500);
 
     // Profil
