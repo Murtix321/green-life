@@ -203,7 +203,7 @@ void main() {
       await _go(t, 1500);
       expect(store.signedIn, isFalse);
       expect(find.text('Google ile devam et'), findsOneWidget);
-      await _go(t, 1500);
+      await _go(t, 6000);
     });
 
     testWidgets('bitki detayı: sulamayı kaydet ve büyüme günlüğü', (t) async {
