@@ -71,7 +71,7 @@ String _cap(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 class PlantInfoService {
   static final Map<String, PlantInfo> _mem = {};
 
-  static String _key(String sci) => 'pinfo_v1_${sci.toLowerCase().trim()}';
+  static String _key(String sci) => 'pinfo_v2_${sci.toLowerCase().trim()}';
 
   /// Bitkinin Türkçe adı, fotoğrafı ve özeti. İnternet yoksa önbellekten döner.
   static Future<PlantInfo?> fetch(String scientific) async {
@@ -91,11 +91,15 @@ class PlantInfoService {
 
     final taxon = await _inatTaxon(sci);
     final title = (taxon?['name'] as String?) ?? sci;
-    final wikiTr = await _wiki('tr', title);
+    final common = taxon?['preferred_common_name'] as String?;
+    // Vikipedi: önce bilimsel ad, sonra Türkçe ad, en son İngilizce
+    var wikiTr = await _wiki('tr', title);
+    if (wikiTr == null && common != null && common.isNotEmpty) {
+      wikiTr = await _wiki('tr', '${common[0].toUpperCase()}${common.substring(1).toLowerCase()}');
+    }
     final wiki = wikiTr ?? await _wiki('en', title);
 
     final photo = taxon?['default_photo'] is Map ? Map<String, dynamic>.from(taxon!['default_photo'] as Map) : null;
-    final common = taxon?['preferred_common_name'] as String?;
     final info = PlantInfo(
       scientific: sci,
       trName: (common == null || common.isEmpty) ? null : _cap(common),

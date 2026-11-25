@@ -33,16 +33,20 @@ jobs:
           H = {'User-Agent': 'GreenLife-CI'}
           def get(u):
               return json.load(urllib.request.urlopen(urllib.request.Request(u, headers=H), timeout=20))
-          t = get('https://api.inaturalist.org/v1/taxa?q=Monstera%20deliciosa&taxon_id=47126&locale=tr&per_page=1')['results'][0]
-          print('iNaturalist:', t['name'], '|', t.get('preferred_common_name'), '|', (t.get('default_photo') or {}).get('medium_url'))
-          a = get('https://api.inaturalist.org/v1/taxa/autocomplete?q=lavanta&taxon_id=47126&locale=tr&per_page=3')['results']
-          print('Arama (lavanta):', [(x['name'], x.get('preferred_common_name'), x['rank']) for x in a])
-          w = get('https://tr.wikipedia.org/api/rest_v1/page/summary/Monstera_deliciosa')
-          print('Vikipedi:', w.get('type'), '|', w.get('extract', '')[:120])
-          m = get('https://api.open-meteo.com/v1/forecast?latitude=41.01&longitude=28.97&current=temperature_2m,relative_humidity_2m&daily=temperature_2m_max&timezone=auto&forecast_days=1')
-          print('Open-Meteo:', m['current'], m['daily'])
-          g = get('https://geocoding-api.open-meteo.com/v1/search?name=Ankara&count=1&language=tr')['results'][0]
-          print('Şehir:', g['name'], g['latitude'], g['longitude'])
+          checks = {
+              'iNaturalist': lambda: (lambda t: (t['name'], t.get('preferred_common_name')))(get('https://api.inaturalist.org/v1/taxa?q=Monstera%20deliciosa&taxon_id=47126&locale=tr&per_page=1')['results'][0]),
+              'Arama (lavanta)': lambda: [(x['name'], x.get('preferred_common_name'), x['rank']) for x in get('https://api.inaturalist.org/v1/taxa/autocomplete?q=lavanta&taxon_id=47126&locale=tr&per_page=3')['results']],
+              'Vikipedi (Deve tabanı)': lambda: get('https://tr.wikipedia.org/api/rest_v1/page/summary/Deve_taban%C4%B1?redirect=true').get('extract', '')[:120],
+              'Vikipedi (Lavanta)': lambda: get('https://tr.wikipedia.org/api/rest_v1/page/summary/Lavanta?redirect=true').get('extract', '')[:120],
+              'Wikipedia EN': lambda: get('https://en.wikipedia.org/api/rest_v1/page/summary/Monstera_deliciosa').get('extract', '')[:80],
+              'Open-Meteo': lambda: (lambda m: (m['current'], m['daily']))(get('https://api.open-meteo.com/v1/forecast?latitude=41.01&longitude=28.97&current=temperature_2m,relative_humidity_2m&daily=temperature_2m_max&timezone=auto&forecast_days=1')),
+              'Şehir': lambda: (lambda g: (g['name'], g['latitude'], g['longitude']))(get('https://geocoding-api.open-meteo.com/v1/search?name=Ankara&count=1&language=tr')['results'][0]),
+          }
+          for k, f in checks.items():
+              try:
+                  print('APICHECK', k, '->', f())
+              except Exception as e:
+                  print('APICHECK', k, '-> HATA', e)
           PY
 
       - name: Android dosyalarını oluştur
