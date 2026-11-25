@@ -1,0 +1,71 @@
+name: Emülatörde uçtan uca test
+
+on:
+  push:
+    branches: [main]
+    paths: ['lib/**', 'integration_test/**', 'test_driver/**', 'assets/**', 'pubspec.yaml', '.github/workflows/e2e.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: KVM'i etkinleştir (emülatör hızı)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.24.5
+          cache: true
+
+      - name: Android dosyalarını oluştur
+        run: |
+          flutter create --org com.greenlife --project-name green_life --platforms=android .
+          python3 tool/patch_android.py
+          flutter pub get
+
+      - name: Emülatörde çalıştır ve ekran görüntüsü al
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          arch: x86_64
+          target: default
+          profile: pixel_6
+          disable-animations: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: flutter drive --driver=test_driver/integration_test.dart --target=integration_test/app_test.dart -d emulator-5554 2>&1 | tee e2e.log
+
+      - name: Sonucu kontrol et
+        if: always()
+        run: |
+          ls -la screenshots || true
+          grep -E "All tests passed|Some tests failed|EXCEPTION|Error:" e2e.log | head -40 || true
+          grep -q "All tests passed" e2e.log
+
+      - name: Ekran görüntülerini test-ekranlari dalına yükle
+        if: always()
+        run: |
+          mkdir -p out && cp -r screenshots out/ 2>/dev/null || true
+          cp e2e.log out/ 2>/dev/null || true
+          cd out
+          git init -q -b test-ekranlari
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Emülatör testi #${{ github.run_number }} ekran görüntüleri" || exit 0
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" test-ekranlari

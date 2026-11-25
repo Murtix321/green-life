@@ -14,6 +14,10 @@ class CareInfo {
   final String tip;
   final PlantKind kind;
 
+  /// Arka planı silinmiş gerçek fotoğraf (assets/plants/...), varsa.
+  final String? image;
+  final String humidity;
+
   const CareInfo({
     required this.keys,
     required this.trName,
@@ -24,6 +28,8 @@ class CareInfo {
     required this.temperature,
     required this.tip,
     this.kind = PlantKind.leafy,
+    this.image,
+    this.humidity = '%40–60',
   });
 }
 
@@ -50,6 +56,7 @@ class CareDb {
       temperature: '15–29 °C',
       tip: 'Fazla sudan hiç hoşlanmaz; toprak tamamen kurumadan sulama.',
       kind: PlantKind.snake,
+      image: 'assets/plants/pasa2.webp',
     ),
     CareInfo(
       keys: ['spathiphyllum'],
@@ -60,6 +67,7 @@ class CareDb {
       light: 'Yarı gölge, dolaylı',
       temperature: '18–26 °C',
       tip: 'Yapraklar hafif sarkınca su istiyordur. Nemli ortamı sever.',
+      image: 'assets/plants/baris.webp',
     ),
     CareInfo(
       keys: ['epipremnum', 'scindapsus'],
@@ -70,6 +78,7 @@ class CareDb {
       light: 'Dolaylı, az ışığa dayanıklı',
       temperature: '17–29 °C',
       tip: 'Uzayan dalları budarsan daha gür olur; kesilen dallar suda köklenir.',
+      image: 'assets/plants/pothos.webp',
     ),
     CareInfo(
       keys: ['philodendron'],
@@ -101,6 +110,7 @@ class CareDb {
       light: 'Bol, dolaylı ışık',
       temperature: '18–27 °C',
       tip: 'Soğuk hava akımından uzak tut, yapraklarını tozdan arındır.',
+      image: 'assets/plants/incir.webp',
     ),
     CareInfo(
       keys: ['zamioculcas'],
@@ -112,6 +122,7 @@ class CareDb {
       temperature: '15–26 °C',
       tip: 'Kökleri su depolar; az sulamak çok sulamaktan iyidir.',
       kind: PlantKind.snake,
+      image: 'assets/plants/zamia.webp',
     ),
     CareInfo(
       keys: ['chlorophytum'],
@@ -123,6 +134,7 @@ class CareDb {
       temperature: '13–27 °C',
       tip: 'Uçlardaki yavruları ayırıp yeni saksılara dikebilirsin.',
       kind: PlantKind.snake,
+      image: 'assets/plants/kurdele.webp',
     ),
     CareInfo(
       keys: ['aloe'],
@@ -134,6 +146,7 @@ class CareDb {
       temperature: '13–27 °C',
       tip: 'Kaktüs toprağı kullan; saksının dibinde su birikmesin.',
       kind: PlantKind.snake,
+      image: 'assets/plants/aloe.webp',
     ),
     CareInfo(
       keys: ['crassula'],
@@ -154,6 +167,7 @@ class CareDb {
       light: 'Parlak, doğrudan güneş yok',
       temperature: '18–28 °C',
       tip: 'Kökleri gümüşi renge dönünce sula; saksıyı suya 10 dk batırıp süz.',
+      image: 'assets/plants/orkide.webp',
     ),
     CareInfo(
       keys: ['dracaena'],

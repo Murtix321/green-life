@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../models/plant.dart';
 import '../services/auth.dart';
 import '../services/store.dart';
 import '../theme.dart';
-import '../widgets/animated_plant.dart';
-import '../widgets/common.dart';
+import '../widgets/glass.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,18 +22,45 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       await StoreScope.read(context).signIn(name: u.name, email: u.email, photo: u.photoUrl);
     } on AuthException catch (e) {
-      if (mounted) showGLSnack(context, e.message);
+      if (mounted && !e.cancelled) _showError(e.message);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  void _showError(String msg) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => GlassSheet(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(22, 0, 22, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SheetHandle(),
+              const Text('Google girişi olmadı', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 8),
+              Text(msg, style: const TextStyle(fontSize: 14, height: 1.5, color: GL.muted)),
+              const SizedBox(height: 16),
+              GreenButton(
+                label: 'E-posta ile devam et',
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _email();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _email() async {
     final res = await showModalBottomSheet<(String, String)>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
       builder: (_) => const _EmailSheet(),
     );
     if (res == null || !mounted) return;
@@ -46,137 +71,96 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final h = MediaQuery.sizeOf(context).height;
     return Scaffold(
-      body: Column(
-        children: [
-          // Üst nane panel + animasyonlu bitki
-          Container(
-            height: h * .55,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              color: GL.mint,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(44)),
-            ),
-            child: SafeArea(
-              bottom: false,
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    top: h * .06,
-                    child: Center(
-                      child: Container(
-                        width: h * .34,
-                        height: h * .34,
-                        decoration: const BoxDecoration(color: Color(0xFFE3F1E6), shape: BoxShape.circle),
-                      ),
+      body: LeafBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: FloatY(
+                    child: Hero(
+                      tag: 'login-plant',
+                      child: Image.asset('assets/plants/incir.webp', height: h * .42, fit: BoxFit.contain,
+                          semanticLabel: 'Beyaz saksıda keman yapraklı incir'),
                     ),
                   ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: AnimatedPlant(kind: PlantKind.monstera, leaves: 5, size: h * .3),
-                    ),
-                  ),
-                  const Positioned(
-                    left: 24,
-                    top: 16,
-                    child: Rise(child: _Logo()),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Rise(
-                      delay: 250,
-                      child: Text(
-                        'Her bitkiye\nkendi bakım planı.',
-                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, height: 1.15, letterSpacing: -.5),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    const Rise(
-                      delay: 400,
-                      child: Text(
-                        'Tara, tanı, hatırlat. Sağlık puanını ve büyümesini tek ekrandan izle.',
-                        style: TextStyle(fontSize: 14, height: 1.5, color: GL.muted),
-                      ),
-                    ),
-                    const Spacer(),
-                    Rise(
-                      delay: 550,
-                      child: Column(
-                        children: [
-                          PrimaryButton(
-                            label: 'Google ile devam et',
-                            busy: _busy,
-                            onTap: _google,
-                            leading: Container(
-                              width: 28,
-                              height: 28,
-                              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                              alignment: Alignment.center,
-                              child: const Text(
-                                'G',
-                                style: TextStyle(color: Color(0xFF4285F4), fontWeight: FontWeight.w900, fontSize: 16),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          SizedBox(
-                            height: 50,
-                            width: double.infinity,
-                            child: OutlinedButton(
-                              onPressed: _busy ? null : _email,
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: GL.ink,
-                                backgroundColor: Colors.white,
-                                side: const BorderSide(color: GL.line, width: 1.5),
-                                shape: const StadiumBorder(),
-                                textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
-                              ),
-                              child: const Text('E-posta ile giriş yap'),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          const Text('Tamamen ücretsiz', style: TextStyle(fontSize: 12, color: GL.muted)),
-                        ],
-                      ),
-                    ),
-                  ],
                 ),
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                child: Rise(
+                  child: Glass(
+                    radius: 30,
+                    padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(Icons.eco_rounded, size: 18, color: GL.greenDark),
+                            SizedBox(width: 6),
+                            Text('Green Life',
+                                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: GL.greenDark)),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        RichText(
+                          text: const TextSpan(
+                            style: TextStyle(fontFamily: GL.font, fontSize: 27, height: 1.15, color: GL.ink, letterSpacing: -.4),
+                            children: [
+                              TextSpan(text: 'Bitkilerin seni\n', style: TextStyle(fontWeight: FontWeight.w500)),
+                              TextSpan(text: 'çok sevecek.', style: TextStyle(fontWeight: FontWeight.w800)),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Sulama gününü hatırlatır, bakımı öğretir, büyümesini kaydeder.',
+                          style: TextStyle(fontSize: 13, height: 1.5, color: GL.muted),
+                        ),
+                        const SizedBox(height: 16),
+                        GreenButton(
+                          key: const ValueKey('google-login'),
+                          label: 'Google ile devam et',
+                          busy: _busy,
+                          onTap: _google,
+                          leading: Container(
+                            width: 26,
+                            height: 26,
+                            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                            alignment: Alignment.center,
+                            child: const Text('G',
+                                style: TextStyle(color: Color(0xFF4285F4), fontWeight: FontWeight.w900, fontSize: 15)),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Glass(
+                          key: const ValueKey('email-login'),
+                          radius: 18,
+                          padding: EdgeInsets.zero,
+                          onTap: _busy ? () {} : _email,
+                          child: const SizedBox(
+                            height: 48,
+                            width: double.infinity,
+                            child: Center(
+                              child: Text('E-posta ile giriş yap',
+                                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Center(
+                          child: Text('Tamamen ücretsiz', style: TextStyle(fontSize: 12, color: GL.muted)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Logo extends StatelessWidget {
-  const _Logo();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(color: GL.forest, borderRadius: BorderRadius.circular(10)),
-          child: const Icon(Icons.eco_rounded, color: Colors.white, size: 18),
         ),
-        const SizedBox(width: 8),
-        const Text('Green Life', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: GL.forest)),
-      ],
+      ),
     );
   }
 }
@@ -203,7 +187,7 @@ class _EmailSheetState extends State<_EmailSheet> {
   void _submit() {
     final n = _name.text.trim();
     final m = _mail.text.trim();
-    if (n.isEmpty || !m.contains('@')) {
+    if (n.isEmpty || !RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(m)) {
       setState(() => _error = 'Adını ve geçerli bir e-posta adresini yaz.');
       return;
     }
@@ -213,48 +197,50 @@ class _EmailSheetState extends State<_EmailSheet> {
   InputDecoration _dec(String label) => InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: GL.bg,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+        fillColor: Colors.white,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
       );
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(24, 12, 24, MediaQuery.viewInsetsOf(context).bottom + 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(color: const Color(0xFFD3DED6), borderRadius: BorderRadius.circular(2)),
-            ),
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: GlassSheet(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(22, 0, 22, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SheetHandle(),
+              const Text('E-posta ile giriş', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 4),
+              const Text('Hesabın şimdilik bu telefonda saklanır.', style: TextStyle(color: GL.muted, fontSize: 13)),
+              const SizedBox(height: 16),
+              TextField(
+                key: const ValueKey('name-field'),
+                controller: _name,
+                decoration: _dec('Adın'),
+                textInputAction: TextInputAction.next,
+                textCapitalization: TextCapitalization.words,
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                key: const ValueKey('mail-field'),
+                controller: _mail,
+                decoration: _dec('E-posta'),
+                keyboardType: TextInputType.emailAddress,
+                onSubmitted: (_) => _submit(),
+              ),
+              if (_error != null) ...[
+                const SizedBox(height: 8),
+                Text(_error!, style: const TextStyle(color: GL.danger, fontSize: 13)),
+              ],
+              const SizedBox(height: 16),
+              GreenButton(key: const ValueKey('email-continue'), label: 'Devam et', onTap: _submit),
+            ],
           ),
-          const SizedBox(height: 18),
-          const Text('E-posta ile giriş', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 6),
-          const Text(
-            'Şimdilik hesabın sadece bu telefonda tutulur.',
-            style: TextStyle(color: GL.muted, fontSize: 13),
-          ),
-          const SizedBox(height: 16),
-          TextField(controller: _name, decoration: _dec('Adın'), textInputAction: TextInputAction.next),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _mail,
-            decoration: _dec('E-posta'),
-            keyboardType: TextInputType.emailAddress,
-            onSubmitted: (_) => _submit(),
-          ),
-          if (_error != null) ...[
-            const SizedBox(height: 8),
-            Text(_error!, style: const TextStyle(color: Color(0xFFB3261E), fontSize: 13)),
-          ],
-          const SizedBox(height: 16),
-          PrimaryButton(label: 'Devam et', onTap: _submit),
-        ],
+        ),
       ),
     );
   }

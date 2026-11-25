@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-/// Çizim stili: animasyonlu bitki hangi yaprak tipiyle çizilecek.
+/// Eski sürümden kalan tür bilgisi (kayıtlarla uyum için tutuluyor).
 enum PlantKind { monstera, snake, leafy }
 
 PlantKind kindFromName(String? s) =>
@@ -9,11 +9,17 @@ PlantKind kindFromName(String? s) =>
 class GrowthEntry {
   final DateTime date;
   final double cm;
-  const GrowthEntry(this.date, this.cm);
 
-  Map<String, dynamic> toJson() => {'d': date.toIso8601String(), 'cm': cm};
-  factory GrowthEntry.fromJson(Map<String, dynamic> j) =>
-      GrowthEntry(DateTime.parse(j['d'] as String), (j['cm'] as num).toDouble());
+  /// Bu günün fotoğrafı: telefondaki dosya yolu ya da 'assets/...' (örnek veriler).
+  final String? photo;
+  const GrowthEntry(this.date, this.cm, {this.photo});
+
+  Map<String, dynamic> toJson() => {'d': date.toIso8601String(), 'cm': cm, if (photo != null) 'p': photo};
+  factory GrowthEntry.fromJson(Map<String, dynamic> j) => GrowthEntry(
+        DateTime.parse(j['d'] as String),
+        (j['cm'] as num).toDouble(),
+        photo: j['p'] as String?,
+      );
 }
 
 DateTime dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
@@ -29,7 +35,14 @@ class Plant {
   DateTime addedAt;
   String light;
   String temperature;
+  String humidity;
   String tip;
+
+  /// Arka planı silinmiş katalog görseli (assets/plants/...), varsa.
+  String? image;
+
+  /// Kullanıcının kendi çektiği fotoğraf (tarama sırasında), varsa.
+  String? photo;
   List<GrowthEntry> growth;
 
   Plant({
@@ -44,6 +57,9 @@ class Plant {
     required this.light,
     required this.temperature,
     required this.tip,
+    this.humidity = '%40–60',
+    this.image,
+    this.photo,
     List<GrowthEntry>? growth,
   }) : growth = growth ?? [];
 
@@ -59,7 +75,6 @@ class Plant {
   }
 
   bool get needsWaterToday => daysUntilWater <= 0;
-
   bool get wateredToday => dateOnly(lastWatered) == dateOnly(DateTime.now());
 
   String get waterLabel {
@@ -70,7 +85,9 @@ class Plant {
     return '$d gün sonra';
   }
 
-  /// Basit sağlık puanı: zamanında sulama ve düzenli ölçüm puanı yükseltir.
+  /// Kısa hâl etiketi (kartlarda).
+  String get statusLabel => needsWaterToday ? 'Su istiyor' : 'Sağlıklı';
+
   int get health {
     var score = 96;
     final d = daysUntilWater;
@@ -80,18 +97,14 @@ class Plant {
     return score.clamp(15, 100);
   }
 
-  int get ageDays => DateTime.now().difference(dateOnly(addedAt)).inDays + 1;
-
   double get currentHeight => growth.isEmpty ? 0 : growth.last.cm;
 
   /// Büyüme günlüğündeki bir kaydın "Gün N" etiketi.
   int dayOf(GrowthEntry e) => dateOnly(e.date).difference(dateOnly(addedAt)).inDays + 1;
 
-  /// Yaprak sayısı (çizim için) — boy arttıkça yeni yapraklar açılır.
   static int leavesFor(double cm, double maxCm) {
     if (maxCm <= 0) return 3;
-    final r = cm / maxCm;
-    return math.max(1, (r * 5).round()).clamp(1, 5);
+    return math.max(1, (cm / maxCm * 5).round()).clamp(1, 5);
   }
 
   Map<String, dynamic> toJson() => {
@@ -105,7 +118,10 @@ class Plant {
         'addedAt': addedAt.toIso8601String(),
         'light': light,
         'temp': temperature,
+        'hum': humidity,
         'tip': tip,
+        'image': image,
+        'photo': photo,
         'growth': growth.map((g) => g.toJson()).toList(),
       };
 
@@ -120,7 +136,10 @@ class Plant {
         addedAt: DateTime.parse(j['addedAt'] as String),
         light: (j['light'] ?? '') as String,
         temperature: (j['temp'] ?? '') as String,
+        humidity: (j['hum'] ?? '%40–60') as String,
         tip: (j['tip'] ?? '') as String,
+        image: j['image'] as String?,
+        photo: j['photo'] as String?,
         growth: ((j['growth'] ?? []) as List)
             .map((e) => GrowthEntry.fromJson(Map<String, dynamic>.from(e as Map)))
             .toList(),

@@ -7,6 +7,15 @@ import '../data/care_db.dart';
 import '../models/plant.dart';
 import 'notifications.dart';
 
+/// Bakım listesindeki bir görev.
+class CareTask {
+  final Plant plant;
+  final String title;
+  final String sub;
+  final bool done;
+  const CareTask(this.plant, this.title, this.sub, this.done);
+}
+
 /// Uygulamanın tüm durumu. Telefonda yerel olarak saklanır.
 class AppStore extends ChangeNotifier {
   static const _key = 'green_life_state_v1';
@@ -23,6 +32,9 @@ class AppStore extends ChangeNotifier {
   double cityLat = 41.01;
   double cityLon = 28.97;
   List<Plant> plants = [];
+
+  /// Bugün tamamlanan görevler (bitki id'leri) — yalnızca bugün için tutulur.
+  final Set<String> _doneToday = {};
 
   Future<void> load() async {
     _prefs = await SharedPreferences.getInstance();
@@ -69,17 +81,13 @@ class AppStore extends ChangeNotifier {
     if (reschedule) await _reschedule();
   }
 
-  Future<void> _reschedule() => WaterAlarms.rescheduleAll(
-        plants,
-        enabled: alarmOn,
-        hour: alarmHour,
-        minute: alarmMinute,
-      );
+  Future<void> _reschedule() =>
+      WaterAlarms.rescheduleAll(plants, enabled: alarmOn, hour: alarmHour, minute: alarmMinute);
 
   String get alarmTimeText =>
       '${alarmHour.toString().padLeft(2, '0')}:${alarmMinute.toString().padLeft(2, '0')}';
 
-  String get firstName => userName.trim().isEmpty ? 'Bitki dostu' : userName.trim().split(' ').first;
+  String get firstName => userName.trim().isEmpty ? 'Bitki Dostu' : userName.trim().split(' ').first;
 
   // ---------- Hesap ----------
 
@@ -108,16 +116,48 @@ class AppStore extends ChangeNotifier {
   }
 
   List<Plant> get dueToday => plants.where((p) => p.needsWaterToday).toList();
-  List<Plant> get wateredTodayList => plants.where((p) => p.wateredToday).toList();
 
-  /// Ana sayfadaki büyük kartta gösterilecek bitki: en acil olan.
-  Plant? get featured {
-    if (plants.isEmpty) return null;
-    final sorted = [...plants]..sort((a, b) => a.daysUntilWater.compareTo(b.daysUntilWater));
-    return sorted.first;
+  /// Bakım ekranı: bugün, yaklaşan, tamamlanan.
+  List<CareTask> get todayTasks {
+    final out = <CareTask>[];
+    for (final p in plants) {
+      final done = _doneToday.contains(p.id);
+      if (p.needsWaterToday || _doneToday.contains(p.id)) {
+        out.add(CareTask(p, '${p.name} sula', done ? 'Bugün sulandı' : (p.daysUntilWater < 0 ? p.waterLabel : 'Bugün'), done));
+      }
+    }
+    return out;
   }
 
-  Plant addFromCare(CareInfo c, {String? name, String room = 'Salon', double? heightCm}) {
+  List<CareTask> get upcomingTasks {
+    final list = plants.where((p) => !p.needsWaterToday && !_doneToday.contains(p.id)).toList()
+      ..sort((a, b) => a.daysUntilWater.compareTo(b.daysUntilWater));
+    return list.map((p) => CareTask(p, '${p.name} sula', p.waterLabel, false)).toList();
+  }
+
+  List<CareTask> get completedTasks {
+    final list = plants.where((p) => p.daysUntilWater < p.waterEveryDays || _doneToday.contains(p.id)).toList()
+      ..sort((a, b) => b.lastWatered.compareTo(a.lastWatered));
+    return list.map((p) {
+      final ago = dateOnly(DateTime.now()).difference(dateOnly(p.lastWatered)).inDays;
+      final when = ago == 0 ? 'Bugün' : (ago == 1 ? 'Dün' : '$ago gün önce');
+      return CareTask(p, '${p.name} sulandı', when, true);
+    }).toList();
+  }
+
+  void toggleTodayTask(Plant p) {
+    if (_doneToday.contains(p.id)) {
+      _doneToday.remove(p.id);
+      // Geri al: son sulamayı bir önceki döngüye çek
+      p.lastWatered = DateTime.now().subtract(Duration(days: p.waterEveryDays));
+    } else {
+      _doneToday.add(p.id);
+      p.lastWatered = DateTime.now();
+    }
+    _save(reschedule: true);
+  }
+
+  Plant addFromCare(CareInfo c, {String? name, String room = 'Salon', String? photo}) {
     final now = DateTime.now();
     final p = Plant(
       id: now.microsecondsSinceEpoch.toString(),
@@ -130,8 +170,11 @@ class AppStore extends ChangeNotifier {
       addedAt: now,
       light: c.light,
       temperature: c.temperature,
+      humidity: c.humidity,
       tip: c.tip,
-      growth: [if (heightCm != null && heightCm > 0) GrowthEntry(now, heightCm)],
+      image: c.image,
+      photo: photo,
+      growth: [if (photo != null) GrowthEntry(now, 0, photo: photo)],
     );
     plants.add(p);
     _save(reschedule: true);
@@ -140,13 +183,19 @@ class AppStore extends ChangeNotifier {
 
   void water(Plant p) {
     p.lastWatered = DateTime.now();
+    _doneToday.add(p.id);
     _save(reschedule: true);
   }
 
-  void addHeight(Plant p, double cm) {
+  /// Bugünün boyunu ve/veya fotoğrafını kaydet.
+  void addGrowth(Plant p, {double? cm, String? photo}) {
     final today = dateOnly(DateTime.now());
+    GrowthEntry? old;
+    for (final g in p.growth) {
+      if (dateOnly(g.date) == today) old = g;
+    }
     p.growth.removeWhere((g) => dateOnly(g.date) == today);
-    p.growth.add(GrowthEntry(DateTime.now(), cm));
+    p.growth.add(GrowthEntry(DateTime.now(), cm ?? old?.cm ?? p.currentHeight, photo: photo ?? old?.photo));
     p.growth.sort((a, b) => a.date.compareTo(b.date));
     _save();
   }
@@ -160,10 +209,11 @@ class AppStore extends ChangeNotifier {
 
   void remove(Plant p) {
     plants.removeWhere((x) => x.id == p.id);
+    _doneToday.remove(p.id);
     _save(reschedule: true);
   }
 
-  // ---------- Alarm ----------
+  // ---------- Alarm & şehir ----------
 
   void setAlarm(bool on) {
     alarmOn = on;
@@ -175,8 +225,6 @@ class AppStore extends ChangeNotifier {
     alarmMinute = m;
     _save(reschedule: true);
   }
-
-  // ---------- Şehir (hava durumu) ----------
 
   void setCity(String name, double lat, double lon) {
     cityName = name;
@@ -195,69 +243,44 @@ class AppStore extends ChangeNotifier {
   void _seedExamples() {
     final now = DateTime.now();
     DateTime ago(int d) => now.subtract(Duration(days: d));
-    final monstera = CareDb.match('monstera deliciosa')!;
-    final snake = CareDb.match('dracaena trifasciata')!;
-    final lily = CareDb.match('spathiphyllum')!;
+    Plant make(String sci, String id, String room, int wateredAgo, int addedAgo, {List<GrowthEntry>? growth}) {
+      final c = CareDb.match(sci)!;
+      return Plant(
+        id: id,
+        name: _shortName(c.trName),
+        scientific: c.scientific,
+        room: room,
+        kind: c.kind,
+        waterEveryDays: c.waterDays,
+        lastWatered: ago(wateredAgo),
+        addedAt: ago(addedAgo),
+        light: c.light,
+        temperature: c.temperature,
+        humidity: c.humidity,
+        tip: c.tip,
+        image: c.image,
+        growth: growth,
+      );
+    }
+
     plants = [
-      Plant(
-        id: 'ornek-monstera',
-        name: 'Monstera',
-        scientific: monstera.scientific,
-        room: 'Salon · Pencere önü',
-        kind: PlantKind.monstera,
-        waterEveryDays: monstera.waterDays,
-        lastWatered: ago(6),
-        addedAt: ago(29),
-        light: monstera.light,
-        temperature: monstera.temperature,
-        tip: monstera.tip,
-        growth: [
-          GrowthEntry(ago(29), 6),
-          GrowthEntry(ago(23), 9),
-          GrowthEntry(ago(16), 14),
-          GrowthEntry(now, 22),
-        ],
-      ),
-      Plant(
-        id: 'ornek-pasa',
-        name: 'Paşa Kılıcı',
-        scientific: snake.scientific,
-        room: 'Yatak odası',
-        kind: PlantKind.snake,
-        waterEveryDays: snake.waterDays,
-        lastWatered: ago(snake.waterDays),
-        addedAt: ago(40),
-        light: snake.light,
-        temperature: snake.temperature,
-        tip: snake.tip,
-        growth: [GrowthEntry(ago(40), 30), GrowthEntry(ago(10), 34)],
-      ),
-      Plant(
-        id: 'ornek-baris',
-        name: 'Barış Çiçeği',
-        scientific: lily.scientific,
-        room: 'Mutfak',
-        kind: PlantKind.leafy,
-        waterEveryDays: lily.waterDays,
-        lastWatered: now,
-        addedAt: ago(12),
-        light: lily.light,
-        temperature: lily.temperature,
-        tip: lily.tip,
-        growth: [GrowthEntry(ago(12), 18), GrowthEntry(ago(2), 21)],
-      ),
+      make('ficus lyrata', 'ornek-incir', 'Salon', 6, 50, growth: [GrowthEntry(ago(50), 62), GrowthEntry(ago(20), 70), GrowthEntry(now, 74)]),
+      make('dracaena trifasciata', 'ornek-pasa', 'Yatak odası', 4, 239, growth: [
+        GrowthEntry(ago(239), 12, photo: 'assets/plants/pasa1.webp'),
+        GrowthEntry(ago(150), 38, photo: 'assets/plants/pasa2.webp'),
+        GrowthEntry(now, 55, photo: 'assets/plants/pasa3.webp'),
+      ]),
+      make('spathiphyllum', 'ornek-baris', 'Mutfak', 6, 30, growth: [GrowthEntry(ago(30), 28), GrowthEntry(now, 33)]),
+      make('epipremnum aureum', 'ornek-pothos', 'Çalışma odası', 7, 20),
     ];
   }
 }
 
 /// Uygulama durumunu widget ağacına taşır: `StoreScope.of(context)`.
 class StoreScope extends InheritedNotifier<AppStore> {
-  const StoreScope({super.key, required AppStore store, required super.child})
-      : super(notifier: store);
+  const StoreScope({super.key, required AppStore store, required super.child}) : super(notifier: store);
 
-  static AppStore of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<StoreScope>()!.notifier!;
+  static AppStore of(BuildContext context) => context.dependOnInheritedWidgetOfExactType<StoreScope>()!.notifier!;
 
-  static AppStore read(BuildContext context) =>
-      context.getInheritedWidgetOfExactType<StoreScope>()!.notifier!;
+  static AppStore read(BuildContext context) => context.getInheritedWidgetOfExactType<StoreScope>()!.notifier!;
 }

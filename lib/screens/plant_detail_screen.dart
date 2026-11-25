@@ -1,83 +1,80 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../models/plant.dart';
 import '../services/store.dart';
 import '../theme.dart';
-import '../widgets/animated_plant.dart';
-import '../widgets/common.dart';
+import '../widgets/glass.dart';
 import '../widgets/plant_info_card.dart';
+import '../widgets/plant_visual.dart';
+import 'growth_screen.dart';
 
-/// Bakım içgörüleri: gün gün büyüme animasyonu, boy grafiği, sulama.
-class PlantDetailScreen extends StatefulWidget {
+/// Bitki detayı (3. referansın orta ekranı): büyük görsel, bakım özeti, ipucu, sulamayı kaydet.
+class PlantDetailScreen extends StatelessWidget {
   final String plantId;
   const PlantDetailScreen({super.key, required this.plantId});
 
-  @override
-  State<PlantDetailScreen> createState() => _PlantDetailScreenState();
-}
-
-class _PlantDetailScreenState extends State<PlantDetailScreen> {
-  int? _sel; // seçili büyüme kaydı (null = en son)
-
-  static const _notes = [
-    'İlk ölçüm. Bitkin yeni evine alışıyor.',
-    'Yeni yaprak hazırlığı var. Toprağı hafif nemli tut.',
-    'Kökler güçleniyor, büyüme hızlandı.',
-    'Gür ve sağlıklı görünüyor. Böyle devam!',
-  ];
-
-  Future<void> _addHeight(Plant p) async {
-    final ctrl = TextEditingController(text: p.currentHeight > 0 ? p.currentHeight.toStringAsFixed(0) : '');
-    final cm = await showDialog<double>(
+  Future<void> _interval(BuildContext context, Plant p) async {
+    var days = p.waterEveryDays;
+    final ok = await showModalBottomSheet<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
-        title: const Text('Bugünkü boy', style: TextStyle(fontWeight: FontWeight.w800)),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
-          decoration: const InputDecoration(suffixText: 'cm', hintText: 'Örn. 24'),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Vazgeç')),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: GL.forest),
-            onPressed: () => Navigator.pop(ctx, double.tryParse(ctrl.text.replaceAll(',', '.'))),
-            child: const Text('Kaydet'),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => GlassSheet(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(22, 0, 22, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SheetHandle(),
+                const Text('Kaç günde bir sulansın?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton.filledTonal(
+                      tooltip: 'Azalt',
+                      onPressed: () => set(() => days = (days - 1).clamp(1, 60)),
+                      icon: const Icon(Icons.remove_rounded),
+                    ),
+                    SizedBox(
+                      width: 110,
+                      child: Text('$days gün',
+                          textAlign: TextAlign.center, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+                    ),
+                    IconButton.filled(
+                      tooltip: 'Arttır',
+                      style: IconButton.styleFrom(backgroundColor: GL.green),
+                      onPressed: () => set(() => days = (days + 1).clamp(1, 60)),
+                      icon: const Icon(Icons.add_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                GreenButton(label: 'Kaydet', onTap: () => Navigator.pop(ctx, true)),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
-    if (cm == null || cm <= 0 || !mounted) return;
-    StoreScope.read(context).addHeight(p, cm);
-    setState(() => _sel = null);
-    showGLSnack(context, 'Boy kaydedildi: ${cm.toStringAsFixed(0)} cm');
+    if (ok == true && context.mounted) StoreScope.read(context).updatePlant(p, waterEveryDays: days);
   }
 
-  Future<void> _more(Plant p) async {
-    final store = StoreScope.read(context);
+  Future<void> _more(BuildContext context, Plant p) async {
     final action = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
-      builder: (ctx) => SafeArea(
+      builder: (ctx) => GlassSheet(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 8),
+            const SheetHandle(),
             ListTile(
-              leading: const Icon(Icons.schedule_rounded, color: GL.forest),
+              leading: const Icon(Icons.schedule_rounded, color: GL.greenDark),
               title: Text('Sulama aralığı: ${p.waterEveryDays} gün'),
-              subtitle: const Text('Değiştirmek için dokun'),
               onTap: () => Navigator.pop(ctx, 'interval'),
             ),
             ListTile(
-              leading: const Icon(Icons.delete_outline_rounded, color: Color(0xFFB3261E)),
-              title: const Text('Bitkiyi sil', style: TextStyle(color: Color(0xFFB3261E))),
+              leading: const Icon(Icons.delete_outline_rounded, color: GL.danger),
+              title: const Text('Bitkiyi sil', style: TextStyle(color: GL.danger)),
               onTap: () => Navigator.pop(ctx, 'delete'),
             ),
             const SizedBox(height: 8),
@@ -85,366 +82,238 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
         ),
       ),
     );
-    if (!mounted) return;
+    if (!context.mounted) return;
     if (action == 'delete') {
-      store.remove(p);
+      StoreScope.read(context).remove(p);
       Navigator.pop(context);
     } else if (action == 'interval') {
-      var days = p.waterEveryDays;
-      final ok = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => StatefulBuilder(
-          builder: (ctx, set) => AlertDialog(
-            backgroundColor: Colors.white,
-            title: const Text('Kaç günde bir sulansın?'),
-            content: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  onPressed: () => set(() => days = (days - 1).clamp(1, 60)),
-                  icon: const Icon(Icons.remove_circle_outline),
-                ),
-                Text('$days gün', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
-                IconButton(
-                  onPressed: () => set(() => days = (days + 1).clamp(1, 60)),
-                  icon: const Icon(Icons.add_circle_outline),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Vazgeç')),
-              FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: GL.forest),
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Kaydet'),
-              ),
-            ],
-          ),
-        ),
-      );
-      if (ok == true) store.updatePlant(p, waterEveryDays: days);
+      await _interval(context, p);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
-    final p = store.byId(widget.plantId);
+    final p = store.byId(plantId);
     if (p == null) return const Scaffold(body: SizedBox.shrink());
-
-    // Son 4 ölçüm "Gün N" sekmeleri olur.
-    final entries = p.growth.length > 4 ? p.growth.sublist(p.growth.length - 4) : p.growth;
-    final maxCm = p.growth.fold<double>(0, (m, g) => g.cm > m ? g.cm : m);
-    final sel = entries.isEmpty ? -1 : (_sel ?? entries.length - 1).clamp(0, entries.length - 1);
-    final cur = sel < 0 ? null : entries[sel];
-    final scale = cur == null || maxCm == 0 ? 1.0 : (0.55 + 0.45 * (cur.cm / maxCm));
-    final leaves = cur == null ? 3 : Plant.leavesFor(cur.cm, maxCm);
-    final note = cur == null
-        ? 'Henüz boy ölçümü yok. Cetvelle ölç ve "Boy ekle"ye dokun; büyümesini gün gün izleyelim.'
-        : _notes[(sel * _notes.length ~/ entries.length).clamp(0, _notes.length - 1)];
+    final watered = p.wateredToday;
 
     return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
-          children: [
-            Row(
-              children: [
-                RoundIconButton(
-                  icon: Icons.arrow_back_rounded,
-                  tooltip: 'Geri',
-                  onTap: () => Navigator.pop(context),
-                ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Text(p.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-                      const Text('Bakım içgörüleri', style: TextStyle(fontSize: 12, color: GL.muted)),
-                    ],
-                  ),
-                ),
-                RoundIconButton(icon: Icons.more_horiz_rounded, tooltip: 'Diğer', onTap: () => _more(p)),
-              ],
-            ),
-            const SizedBox(height: 14),
-
-            // Gün seçici
-            if (entries.isNotEmpty)
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(color: GL.mintSoft, borderRadius: BorderRadius.circular(24)),
-                child: Row(
+      body: LeafBackground(
+        asset: 'assets/bg/dua.jpg',
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                   children: [
-                    for (var i = 0; i < entries.length; i++)
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => _sel = i),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 380),
-                            curve: Curves.easeOutCubic,
-                            height: 40,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: i == sel ? GL.forest : Colors.transparent,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              'Gün ${p.dayOf(entries[i])}',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 13,
-                                color: i == sel ? Colors.white : const Color(0xFF2C4636),
+                    Row(
+                      children: [
+                        GlassIconButton(icon: Icons.arrow_back_rounded, tooltip: 'Geri', onTap: () => Navigator.pop(context)),
+                        const Spacer(),
+                        GlassIconButton(icon: Icons.more_horiz_rounded, tooltip: 'Diğer', onTap: () => _more(context, p)),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 270,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            left: 2,
+                            top: 10,
+                            right: 150,
+                            child: Rise(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(p.name,
+                                      style: const TextStyle(fontSize: 27, fontWeight: FontWeight.w800, height: 1.1, letterSpacing: -.5)),
+                                  const SizedBox(height: 4),
+                                  Text(p.scientific,
+                                      style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: GL.muted)),
+                                  const SizedBox(height: 10),
+                                  Glass(
+                                    radius: 14,
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 8,
+                                          height: 8,
+                                          decoration: BoxDecoration(
+                                            color: p.needsWaterToday ? GL.warnDot : GL.green,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(p.statusLabel,
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w700,
+                                                color: p.needsWaterToday ? GL.warn : GL.greenDark)),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(p.room, style: const TextStyle(fontSize: 12, color: GL.muted)),
+                                ],
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            const SizedBox(height: 12),
-
-            // Boy + büyüyen bitki
-            GLCard(
-              child: SizedBox(
-                height: 190,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Boy', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: GL.muted)),
-                          TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0, end: cur?.cm ?? 0.0),
-                            duration: const Duration(milliseconds: 900),
-                            curve: Curves.easeOutCubic,
-                            builder: (_, v, __) => Text(
-                              cur == null ? '–' : '${v.toStringAsFixed(0)} cm',
-                              style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800, height: 1.1),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 350),
-                            child: Text(
-                              note,
-                              key: ValueKey(note),
-                              style: const TextStyle(fontSize: 12, height: 1.45, color: GL.muted),
+                          Positioned(
+                            right: 0,
+                            top: 8,
+                            bottom: 0,
+                            width: 170,
+                            child: FloatY(
+                              child: Hero(tag: 'plant-${p.id}', child: PlantVisual(p, preferPhoto: false)),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    Hero(
-                      tag: 'plant-${p.id}',
-                      child: AnimatedPlant(kind: p.kind, leaves: leaves, scale: scale, size: 140),
+                    const SizedBox(height: 6),
+                    Rise(
+                      delay: 80,
+                      child: Glass(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Bakım özeti', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                _Tile(icon: Icons.water_drop_outlined, label: 'Su', value: p.waterLabel),
+                                const SizedBox(width: 6),
+                                _Tile(icon: Icons.wb_sunny_outlined, label: 'Işık', value: p.light),
+                                const SizedBox(width: 6),
+                                _Tile(icon: Icons.thermostat_rounded, label: 'Sıcaklık', value: p.temperature),
+                                const SizedBox(width: 6),
+                                _Tile(icon: Icons.water_outlined, label: 'Nem', value: p.humidity),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Rise(
+                      delay: 140,
+                      child: Glass(
+                        padding: const EdgeInsets.all(14),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Bakım ipucu', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                            const SizedBox(height: 4),
+                            Text(p.tip, style: const TextStyle(fontSize: 13, height: 1.5, color: GL.muted)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Rise(
+                      delay: 200,
+                      child: Glass(
+                        key: const ValueKey('open-growth'),
+                        padding: const EdgeInsets.all(12),
+                        onTap: () => Navigator.of(context).push(glRoute(GrowthScreen(plantId: p.id))),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(color: GL.glassStrong, borderRadius: BorderRadius.circular(14)),
+                              child: const Icon(Icons.trending_up_rounded, color: GL.greenDark),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Büyüme günlüğü', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                                  Text(
+                                    p.growth.isEmpty
+                                        ? 'Fotoğraf ekleyerek büyümesini gün gün izle'
+                                        : '${p.growth.length} kayıt · şu an ${p.currentHeight.toStringAsFixed(0)} cm',
+                                    style: const TextStyle(fontSize: 12, color: GL.muted),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right_rounded),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    PlantAboutCard(scientific: p.scientific),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GreenButton(
+                        key: const ValueKey('log-water'),
+                        label: watered ? 'Sulandı · ${p.waterEveryDays} gün sonra tekrar' : 'Sulamayı kaydet',
+                        icon: watered ? Icons.check_rounded : Icons.water_drop_rounded,
+                        color: watered ? GL.greenDark : GL.green,
+                        onTap: watered
+                            ? null
+                            : () {
+                                store.water(p);
+                                showGLSnack(context, '${p.name} sulandı. Sonraki sulama ${p.waterEveryDays} gün sonra.');
+                              },
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    GlassIconButton(
+                      icon: Icons.calendar_month_rounded,
+                      tooltip: 'Sulama aralığı',
+                      size: 54,
+                      onTap: () => _interval(context, p),
                     ),
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-
-            // Büyüme grafiği
-            GLCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Expanded(
-                        child: Text('Büyüme (cm)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
-                      ),
-                      if (p.growth.length >= 2)
-                        Text(
-                          '+${(p.growth.last.cm - p.growth.first.cm).toStringAsFixed(0)} cm',
-                          style: const TextStyle(color: GL.forestMid, fontWeight: FontWeight.w800),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  if (entries.isEmpty)
-                    const Text('Grafik için en az bir ölçüm ekle.', style: TextStyle(color: GL.muted, fontSize: 13))
-                  else
-                    _Bars(entries: entries, maxCm: maxCm, selected: sel, dayOf: p.dayOf, onTap: (i) => setState(() => _sel = i)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            Row(
-              children: [
-                Expanded(
-                  child: _MiniStat(
-                    icon: Icons.wb_sunny_rounded,
-                    color: GL.sun,
-                    label: 'Işık',
-                    value: p.light,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _MiniStat(
-                    icon: Icons.water_drop_rounded,
-                    color: GL.water,
-                    label: 'Sonraki su',
-                    value: p.waterLabel,
-                    sub: '${store.alarmTimeText} alarm',
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            GLCard(
-              color: GL.mintPale,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.lightbulb_outline_rounded, color: GL.forest),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      '${p.tip}\nSıcaklık: ${p.temperature} · ${p.waterEveryDays} günde bir sulama',
-                      style: const TextStyle(fontSize: 13, height: 1.5),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            PlantAboutCard(scientific: p.scientific),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: PrimaryButton(
-                    label: p.wateredToday ? 'Bugün sulandı' : 'Sulandı',
-                    leading: const Icon(Icons.water_drop_rounded, size: 20),
-                    onTap: p.wateredToday
-                        ? null
-                        : () {
-                            store.water(p);
-                            showGLSnack(context, 'Harika! Sonraki sulama ${p.waterEveryDays} gün sonra.');
-                          },
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: PrimaryButton(
-                    label: 'Boy ekle',
-                    bg: GL.mintSoft,
-                    fg: GL.forest,
-                    leading: const Icon(Icons.straighten_rounded, size: 20),
-                    onTap: () => _addHeight(p),
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _Bars extends StatelessWidget {
-  final List<GrowthEntry> entries;
-  final double maxCm;
-  final int selected;
-  final int Function(GrowthEntry) dayOf;
-  final ValueChanged<int> onTap;
-
-  const _Bars({
-    required this.entries,
-    required this.maxCm,
-    required this.selected,
-    required this.dayOf,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 130,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          for (var i = 0; i < entries.length; i++)
-            Expanded(
-              child: GestureDetector(
-                onTap: () => onTap(i),
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        entries[i].cm.toStringAsFixed(0),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: i == selected ? GL.ink : GL.muted,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0, end: maxCm == 0 ? 0.0 : entries[i].cm / maxCm),
-                        duration: Duration(milliseconds: 700 + i * 150),
-                        curve: Curves.easeOutBack,
-                        builder: (_, t, __) => AnimatedContainer(
-                          duration: const Duration(milliseconds: 350),
-                          height: (86 * t).clamp(4.0, 96.0),
-                          decoration: BoxDecoration(
-                            color: i == selected
-                                ? GL.forest
-                                : (i < selected ? const Color(0xFF8FC7A1) : const Color(0xFFD6E8DB)),
-                            borderRadius: const BorderRadius.vertical(top: Radius.circular(10), bottom: Radius.circular(4)),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text('Gün ${dayOf(entries[i])}', style: const TextStyle(fontSize: 11, color: GL.muted)),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MiniStat extends StatelessWidget {
+class _Tile extends StatelessWidget {
   final IconData icon;
-  final Color color;
   final String label;
   final String value;
-  final String? sub;
-
-  const _MiniStat({required this.icon, required this.color, required this.label, required this.value, this.sub});
+  const _Tile({required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
-    return GLCard(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: 6),
-              Text(label, style: const TextStyle(fontSize: 12, color: GL.muted)),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(value, maxLines: 2, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, height: 1.2)),
-          if (sub != null) Text(sub!, style: const TextStyle(fontSize: 11, color: GL.muted)),
-        ],
+    return Expanded(
+      child: Glass(
+        radius: 16,
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+        child: Column(
+          children: [
+            Icon(icon, size: 19, color: GL.greenDark),
+            const SizedBox(height: 2),
+            Text(label, style: const TextStyle(fontSize: 11, color: GL.muted)),
+            Text(value,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, height: 1.2)),
+          ],
+        ),
       ),
     );
   }

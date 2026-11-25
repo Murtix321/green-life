@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import '../widgets/glass.dart';
+import 'care_screen.dart';
 import 'home_screen.dart';
 import 'plants_screen.dart';
 import 'profile_screen.dart';
 import 'scan_screen.dart';
 
-/// Alt menülü ana iskelet: Ana sayfa · Bitkiler · Tara · Profil
+/// Alt menülü iskelet: Ana sayfa · Bitkilerim · Bakım · Profil
 class Shell extends StatefulWidget {
   const Shell({super.key});
 
@@ -17,77 +19,45 @@ class Shell extends StatefulWidget {
 class _ShellState extends State<Shell> {
   int _tab = 0;
 
-  void _go(int i) {
-    if (i == 2) {
-      Navigator.of(context).push(glRoute(const ScanScreen(), fullscreen: true));
-      return;
-    }
-    setState(() => _tab = i);
-  }
+  void _scan() => Navigator.of(context).push(glRoute(const ScanScreen(), fullscreen: true));
 
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomeScreen(onOpenPlants: () => _go(1), onScan: () => _go(2)),
-      PlantsScreen(onScan: () => _go(2)),
-      const SizedBox.shrink(),
+      HomeScreen(onScan: _scan, onOpenPlants: () => setState(() => _tab = 1), onOpenCare: () => setState(() => _tab = 2)),
+      PlantsScreen(onScan: _scan),
+      const CareScreen(),
       const ProfileScreen(),
     ];
     return Scaffold(
       extendBody: true,
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 420),
-        switchInCurve: Curves.easeOutCubic,
-        switchOutCurve: Curves.easeInCubic,
-        transitionBuilder: (child, a) => FadeTransition(
-          opacity: a,
-          child: SlideTransition(
-            position: Tween(begin: const Offset(0, .03), end: Offset.zero).animate(a),
-            child: child,
+      body: LeafBackground(
+        asset: _tab == 1 || _tab == 3 ? 'assets/bg/dua.jpg' : 'assets/bg/yaprak.jpg',
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 420),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          transitionBuilder: (child, a) => FadeTransition(
+            opacity: a,
+            child: SlideTransition(
+              position: Tween(begin: const Offset(0, .025), end: Offset.zero).animate(a),
+              child: child,
+            ),
           ),
+          child: KeyedSubtree(key: ValueKey(_tab), child: pages[_tab]),
         ),
-        child: KeyedSubtree(key: ValueKey(_tab), child: pages[_tab]),
       ),
-      bottomNavigationBar: _NavBar(index: _tab, onTap: _go),
-    );
-  }
-}
-
-class _NavBar extends StatelessWidget {
-  final int index;
-  final ValueChanged<int> onTap;
-  const _NavBar({required this.index, required this.onTap});
-
-  static const _items = [
-    (Icons.home_rounded, 'Ana sayfa'),
-    (Icons.eco_outlined, 'Bitkiler'),
-    (Icons.center_focus_strong_rounded, 'Tara'),
-    (Icons.person_outline_rounded, 'Profil'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [BoxShadow(color: GL.ink.withOpacity(.10), blurRadius: 24, offset: const Offset(0, -8))],
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 78,
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        child: Glass(
+          radius: 26,
+          padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(
             children: [
-              for (var i = 0; i < _items.length; i++)
-                Expanded(
-                  child: _NavItem(
-                    icon: _items[i].$1,
-                    label: _items[i].$2,
-                    active: i == index,
-                    onTap: () => onTap(i),
-                  ),
-                ),
+              _NavItem(icon: Icons.home_rounded, label: 'Ana sayfa', active: _tab == 0, onTap: () => setState(() => _tab = 0)),
+              _NavItem(icon: Icons.eco_outlined, label: 'Bitkilerim', active: _tab == 1, onTap: () => setState(() => _tab = 1)),
+              _NavItem(icon: Icons.water_drop_outlined, label: 'Bakım', active: _tab == 2, onTap: () => setState(() => _tab = 2)),
+              _NavItem(icon: Icons.person_outline_rounded, label: 'Profil', active: _tab == 3, onTap: () => setState(() => _tab = 3)),
             ],
           ),
         ),
@@ -105,36 +75,33 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      selected: active,
-      label: label,
-      child: InkResponse(
-        onTap: onTap,
-        radius: 36,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 380),
-              curve: Curves.easeOutBack,
-              width: active ? 48 : 36,
-              height: active ? 48 : 36,
-              decoration: BoxDecoration(color: active ? GL.forest : Colors.transparent, shape: BoxShape.circle),
-              child: Icon(icon, size: 22, color: active ? Colors.white : GL.muted),
+    final color = active ? GL.greenDark : GL.muted;
+    return Expanded(
+      child: Semantics(
+        button: true,
+        selected: active,
+        label: label,
+        excludeSemantics: true,
+        child: InkResponse(
+          onTap: onTap,
+          radius: 34,
+          child: SizedBox(
+            height: 50,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedScale(
+                  scale: active ? 1.12 : 1,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutBack,
+                  child: Icon(icon, size: 23, color: color),
+                ),
+                const SizedBox(height: 3),
+                Text(label,
+                    style: TextStyle(fontSize: 10.5, fontWeight: active ? FontWeight.w700 : FontWeight.w500, color: color)),
+              ],
             ),
-            const SizedBox(height: 2),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 300),
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: active ? FontWeight.w800 : FontWeight.w600,
-                color: active ? GL.forest : GL.muted,
-                fontFamily: DefaultTextStyle.of(context).style.fontFamily,
-              ),
-              child: Text(label),
-            ),
-          ],
+          ),
         ),
       ),
     );

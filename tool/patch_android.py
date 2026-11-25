@@ -6,6 +6,7 @@
 """
 import pathlib
 import re
+import shutil
 import sys
 
 root = pathlib.Path("android/app")
@@ -14,6 +15,40 @@ groovy = root / "build.gradle"
 manifest = root / "src/main/AndroidManifest.xml"
 
 DESUGAR = "com.android.tools:desugar_jdk_libs:2.1.4"
+
+
+SIGN_GROOVY = """    signingConfigs {
+        debug {
+            storeFile file('greenlife-test.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {"""
+
+SIGN_KTS = """    signingConfigs {
+        getByName("debug") {
+            storeFile = file("greenlife-test.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
+    buildTypes {"""
+
+
+def patch_signing(p, s):
+    """Sabit test anahtarı: her derlemede aynı SHA-1 (Google girişi için gerekli)."""
+    shutil.copy("tool/debug.keystore", root / "greenlife-test.keystore")
+    if "greenlife-test.keystore" in s:
+        return s
+    sign = SIGN_KTS if p.suffix == ".kts" else SIGN_GROOVY
+    if "buildTypes {" not in s:
+        sys.exit("buildTypes bulunamadı")
+    return s.replace("    buildTypes {", sign, 1)
 
 
 def patch_gradle():
@@ -41,8 +76,9 @@ def patch_gradle():
             s += f"\ndependencies {{\n    coreLibraryDesugaring '{DESUGAR}'\n}}\n"
     else:
         sys.exit("build.gradle bulunamadı")
-    if "Desugaring" not in s and "desugaring" not in s.lower():
+    if "desugaring" not in s.lower():
         sys.exit("desugaring eklenemedi")
+    s = patch_signing(p, s)
     p.write_text(s)
     print("gradle düzenlendi:", p)
 

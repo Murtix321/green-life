@@ -12,6 +12,7 @@ Future<void> main() async {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.dark,
+    systemNavigationBarColor: Colors.transparent,
   ));
   await WaterAlarms.init();
   final store = AppStore();
@@ -50,7 +51,7 @@ class _Root extends StatelessWidget {
       switchOutCurve: Curves.easeInCubic,
       transitionBuilder: (child, a) => FadeTransition(
         opacity: a,
-        child: ScaleTransition(scale: Tween(begin: .96, end: 1.0).animate(a), child: child),
+        child: ScaleTransition(scale: Tween(begin: .97, end: 1.0).animate(a), child: child),
       ),
       child: store.signedIn ? const Shell(key: ValueKey('shell')) : const LoginScreen(key: ValueKey('login')),
     );

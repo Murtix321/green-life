@@ -3,7 +3,7 @@ name: APK derle
 on:
   push:
     branches: [main]
-    paths: ['lib/**', 'test/**', 'pubspec.yaml', 'tool/patch_android.py', '.github/workflows/apk.yml']
+    paths: ['lib/**', 'test/**', 'assets/**', 'pubspec.yaml', 'tool/patch_android.py', 'tool/debug.keystore', '.github/workflows/apk.yml']
   workflow_dispatch:
 
 permissions:
@@ -58,8 +58,14 @@ jobs:
 
       - run: flutter pub get
 
-      - name: Testler
+      - name: Kod analizi
+        run: flutter analyze --no-fatal-infos
+
+      - name: Birim ve widget testleri
         run: flutter test
+
+      - name: İmza parmak izi (Google girişi için)
+        run: keytool -list -v -keystore tool/debug.keystore -storepass android -alias androiddebugkey | grep -E "SHA1|SHA256"
 
       - name: APK derle
         env:
