@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:green_life/data/care_db.dart';
 import 'package:green_life/models/plant.dart';
+import 'package:green_life/services/weather.dart';
 
 void main() {
   test('Bakım veritabanı bilimsel adla eşleşir', () {
@@ -26,5 +27,11 @@ void main() {
     );
     expect(p.needsWaterToday, isTrue);
     expect(p.waterLabel, 'Bugün sula');
+  });
+
+  test('Hava durumu ipucu', () {
+    expect(const WeatherNow(28, 33, 50).tip, contains('sıcak'));
+    expect(const WeatherNow(20, 22, 25).tip, contains('kuru'));
+    expect(const WeatherNow(20, 22, 55).tip, contains('ideal'));
   });
 }

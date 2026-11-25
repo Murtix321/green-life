@@ -6,6 +6,7 @@ import '../services/store.dart';
 import '../theme.dart';
 import '../widgets/animated_plant.dart';
 import '../widgets/common.dart';
+import '../widgets/plant_info_card.dart';
 
 /// Bakım içgörüleri: gün gün büyüme animasyonu, boy grafiği, sulama.
 class PlantDetailScreen extends StatefulWidget {
@@ -312,6 +313,8 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
                 ],
               ),
             ),
+            const SizedBox(height: 12),
+            PlantAboutCard(scientific: p.scientific),
             const SizedBox(height: 16),
             Row(
               children: [

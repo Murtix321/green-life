@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/plant.dart';
 import '../services/store.dart';
+import '../services/weather.dart';
 import '../theme.dart';
 import '../widgets/animated_plant.dart';
 import '../widgets/common.dart';
@@ -66,6 +67,16 @@ class HomeScreen extends StatelessWidget {
             Rise(delay: 120, child: _EmptyCard(onScan: onScan))
           else
             Rise(delay: 120, child: _FeaturedCard(plant: featured)),
+          const SizedBox(height: 14),
+          Rise(
+            delay: 180,
+            child: _WeatherTip(
+              key: ValueKey('${store.cityLat},${store.cityLon}'),
+              city: store.cityName,
+              lat: store.cityLat,
+              lon: store.cityLon,
+            ),
+          ),
           const SizedBox(height: 14),
           Rise(
             delay: 240,
@@ -417,6 +428,77 @@ class _EmptyCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Open-Meteo hava durumuna göre günün bakım ipucu.
+class _WeatherTip extends StatefulWidget {
+  final String city;
+  final double lat;
+  final double lon;
+  const _WeatherTip({super.key, required this.city, required this.lat, required this.lon});
+
+  @override
+  State<_WeatherTip> createState() => _WeatherTipState();
+}
+
+class _WeatherTipState extends State<_WeatherTip> {
+  late final Future<WeatherNow?> _f = WeatherService.now(widget.lat, widget.lon);
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<WeatherNow?>(
+      future: _f,
+      builder: (context, snap) {
+        final w = snap.data;
+        if (snap.connectionState == ConnectionState.done && w == null) return const SizedBox.shrink();
+        return AnimatedSize(
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeOutCubic,
+          child: GLCard(
+            color: GL.mintPale,
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                  alignment: Alignment.center,
+                  child: w == null
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: GL.forest),
+                        )
+                      : Text('${w.temp.round()}°',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: GL.forest)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${widget.city} · bugünün ipucu',
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: GL.forestMid)),
+                      const SizedBox(height: 2),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 400),
+                        child: Text(
+                          w?.tip ?? 'Hava durumu alınıyor…',
+                          key: ValueKey(w?.tip),
+                          style: const TextStyle(fontSize: 13, height: 1.4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

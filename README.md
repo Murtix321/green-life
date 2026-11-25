@@ -116,6 +116,16 @@ Firebase gerekmez, ama Google'a uygulamanı tanıtman lazım:
 
 Yapılandırma yapılmadan basarsan uygulama nazikçe uyarır; bu sırada **E-posta ile giriş** ile devam edebilirsin (şimdilik hesap sadece telefonda tutulur).
 
+## Ücretsiz veri kaynakları (public-apis listesinden)
+
+| Kaynak | Ne için | Anahtar |
+|---|---|---|
+| [iNaturalist](https://api.inaturalist.org/v1/docs/) | Bitkinin Türkçe adı, gerçek fotoğrafı, "Bitki ara" ile tüm bitkilerde arama | Gerekmez |
+| [Wikipedia / Vikipedi](https://www.mediawiki.org/wiki/API:Main_page) | Detay ekranındaki "Hakkında" metni (Türkçe yoksa İngilizce) | Gerekmez |
+| [Open-Meteo](https://open-meteo.com/) | Şehrine göre günün bakım ipucu (sıcak, kuru, soğuk hava) | Gerekmez (ticari olmayan kullanım) |
+
+Bilgiler telefonda önbelleğe alınır; aynı bitki için tekrar istek atılmaz.
+
 ## Proje yapısı
 
 ```

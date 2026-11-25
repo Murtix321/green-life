@@ -6,10 +6,12 @@ import 'package:image_picker/image_picker.dart';
 import '../data/care_db.dart';
 import '../models/plant.dart';
 import '../services/plant_id.dart';
+import '../services/plant_info.dart';
 import '../services/store.dart';
 import '../theme.dart';
 import '../widgets/animated_plant.dart';
 import '../widgets/common.dart';
+import '../widgets/plant_info_card.dart';
 import 'plant_detail_screen.dart';
 import 'plants_screen.dart';
 
@@ -33,6 +35,7 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
   List<IdCandidate> _candidates = [];
   int _selected = 0;
   CareInfo? _care;
+  PlantInfo? _info;
   String _error = '';
 
   @override
@@ -57,8 +60,10 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
         _candidates = list;
         _selected = 0;
         _care = care;
+        _info = null;
         _phase = _Phase.result;
       });
+      _loadInfo(list.first.scientific);
     } on PlantIdException catch (e) {
       _fail(e.message);
     } catch (e) {
@@ -76,8 +81,17 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
 
   Future<void> _choose(int i) async {
     setState(() => _selected = i);
+    setState(() => _info = null);
+    _loadInfo(_candidates[i].scientific);
     final care = await PlantIdService.careFor(_candidates[i]);
     if (mounted) setState(() => _care = care);
+  }
+
+  /// iNaturalist + Wikipedia: Türkçe ad ve karşılaştırma fotoğrafı (arka planda).
+  Future<void> _loadInfo(String sci) async {
+    final info = await PlantInfoService.fetch(sci);
+    if (!mounted || _candidates.isEmpty || _candidates[_selected].scientific != sci) return;
+    setState(() => _info = info);
   }
 
   void _add() {
@@ -85,7 +99,10 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
     final care = _care!;
     final store = StoreScope.read(context);
     final local = CareDb.match(c.scientific, family: c.family);
-    final p = store.addFromCare(care, name: local == null ? (c.commonName ?? c.scientific) : null);
+    final p = store.addFromCare(
+      care,
+      name: local == null ? (_info?.trName ?? c.commonName ?? c.scientific) : null,
+    );
     Navigator.of(context).pushReplacement(glRoute(PlantDetailScreen(plantId: p.id)));
     showGLSnack(context, '${p.name} bahçene eklendi. Sulama alarmı kuruldu.');
   }
@@ -307,13 +324,26 @@ class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
         return wrap([
           Row(
             children: [
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 450),
+                child: _info?.photoUrl == null
+                    ? const SizedBox(key: ValueKey('np'), width: 0)
+                    : Padding(
+                        key: ValueKey(_info!.photoUrl),
+                        padding: const EdgeInsets.only(right: 12),
+                        child: NetPhoto(_info!.photoUrl!, width: 58, height: 58, radius: 16),
+                      ),
+              ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(c.scientific, style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800)),
                     Text(
-                      [if (c.commonName != null) c.commonName!, if (c.family != null) c.family!].join(' · '),
+                      _info?.trName ?? c.commonName ?? c.scientific,
+                      style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800),
+                    ),
+                    Text(
+                      [c.scientific, if (c.family != null) c.family!].join(' · '),
                       style: const TextStyle(fontSize: 13, color: GL.muted),
                     ),
                   ],

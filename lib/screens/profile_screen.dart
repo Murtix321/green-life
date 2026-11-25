@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/auth.dart';
 import '../services/plant_id.dart';
 import '../services/store.dart';
+import '../services/weather.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 
@@ -74,6 +75,13 @@ class ProfileScreen extends StatelessWidget {
                     subtitle: const Text('Sulama günü gelince bildirim gönder'),
                   ),
                   ListTile(
+                    leading: const Icon(Icons.location_city_rounded, color: GL.forest),
+                    title: const Text('Şehir (hava durumu ipucu)', style: TextStyle(fontWeight: FontWeight.w700)),
+                    trailing: Text(store.cityName,
+                        style: const TextStyle(fontWeight: FontWeight.w800, color: GL.forest)),
+                    onTap: () => _pickCity(context, store),
+                  ),
+                  ListTile(
                     leading: const Icon(Icons.schedule_rounded, color: GL.forest),
                     title: const Text('Alarm saati', style: TextStyle(fontWeight: FontWeight.w700)),
                     trailing: Text(store.alarmTimeText,
@@ -132,6 +140,41 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> _pickCity(BuildContext context, AppStore store) async {
+  final ctrl = TextEditingController(text: store.cityName);
+  final name = await showDialog<String>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      backgroundColor: Colors.white,
+      title: const Text('Hangi şehirdesin?'),
+      content: TextField(
+        controller: ctrl,
+        autofocus: true,
+        textCapitalization: TextCapitalization.words,
+        decoration: const InputDecoration(hintText: 'Örn. Ankara'),
+        onSubmitted: (v) => Navigator.pop(ctx, v),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Vazgeç')),
+        FilledButton(
+          style: FilledButton.styleFrom(backgroundColor: GL.forest),
+          onPressed: () => Navigator.pop(ctx, ctrl.text),
+          child: const Text('Kaydet'),
+        ),
+      ],
+    ),
+  );
+  if (name == null || name.trim().isEmpty) return;
+  final city = await WeatherService.findCity(name);
+  if (!context.mounted) return;
+  if (city == null) {
+    showGLSnack(context, 'Şehir bulunamadı. İnternet bağlantını ve yazımı kontrol et.');
+    return;
+  }
+  store.setCity(city.name, city.lat, city.lon);
+  showGLSnack(context, 'Şehir ${city.name} olarak ayarlandı.');
 }
 
 class _Stat extends StatelessWidget {

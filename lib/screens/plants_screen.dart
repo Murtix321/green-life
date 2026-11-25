@@ -1,11 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../data/care_db.dart';
 import '../models/plant.dart';
+import '../services/plant_id.dart';
+import '../services/plant_info.dart';
 import '../services/store.dart';
 import '../theme.dart';
 import '../widgets/animated_plant.dart';
 import '../widgets/common.dart';
+import '../widgets/plant_info_card.dart';
 import 'plant_detail_screen.dart';
 
 class PlantsScreen extends StatefulWidget {
@@ -65,7 +70,7 @@ class _PlantsScreenState extends State<PlantsScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: PrimaryButton(
-                    label: 'Listeden ekle',
+                    label: 'Bitki ara',
                     height: 48,
                     bg: GL.mintSoft,
                     fg: GL.forest,
@@ -148,9 +153,9 @@ class _PlantRow extends StatelessWidget {
   }
 }
 
-/// Tarama yapmadan, hazır listeden bitki ekleme.
+/// Tarama yapmadan bitki ekleme: hazır Türkçe liste + iNaturalist'te tüm bitkiler.
 Future<void> showAddFromListSheet(BuildContext context) async {
-  final picked = await showModalBottomSheet<CareInfo>(
+  final picked = await showModalBottomSheet<(CareInfo, String?)>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.white,
@@ -159,7 +164,7 @@ Future<void> showAddFromListSheet(BuildContext context) async {
   );
   if (picked == null || !context.mounted) return;
   final store = StoreScope.read(context);
-  final p = store.addFromCare(picked);
+  final p = store.addFromCare(picked.$1, name: picked.$2);
   showGLSnack(context, '${p.name} eklendi. Sulama alarmı kuruldu.');
 }
 
@@ -172,14 +177,57 @@ class _CarePicker extends StatefulWidget {
 
 class _CarePickerState extends State<_CarePicker> {
   String _q = '';
+  Timer? _debounce;
+  bool _searching = false;
+  List<TaxonHit> _remote = [];
+  int? _adding; // eklenmekte olan iNaturalist kaydı
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  void _onChanged(String v) {
+    setState(() => _q = v.trim().toLowerCase());
+    _debounce?.cancel();
+    if (_q.length < 3) {
+      setState(() {
+        _remote = [];
+        _searching = false;
+      });
+      return;
+    }
+    _debounce = Timer(const Duration(milliseconds: 450), () async {
+      final q = _q;
+      setState(() => _searching = true);
+      final hits = await PlantInfoService.search(q);
+      if (!mounted || q != _q) return;
+      setState(() {
+        _remote = hits;
+        _searching = false;
+      });
+    });
+  }
+
+  Future<void> _pickRemote(TaxonHit h) async {
+    setState(() => _adding = h.id);
+    final care = await PlantIdService.careFor(IdCandidate(h.scientific, h.trName, null, 1));
+    if (!mounted) return;
+    final local = CareDb.match(h.scientific);
+    Navigator.pop(context, (care, local == null ? h.title : null));
+  }
 
   @override
   Widget build(BuildContext context) {
-    final items = CareDb.all
+    final local = CareDb.all
         .where((c) => _q.isEmpty || c.trName.toLowerCase().contains(_q) || c.scientific.toLowerCase().contains(_q))
         .toList();
+    final localSci = local.map((c) => c.scientific.toLowerCase()).toSet();
+    final remote = _remote.where((h) => !localSci.contains(h.scientific.toLowerCase())).toList();
+
     return SizedBox(
-      height: MediaQuery.sizeOf(context).height * .8,
+      height: MediaQuery.sizeOf(context).height * .85,
       child: Padding(
         padding: EdgeInsets.fromLTRB(18, 12, 18, MediaQuery.viewInsetsOf(context).bottom),
         child: Column(
@@ -192,14 +240,33 @@ class _CarePickerState extends State<_CarePicker> {
             const SizedBox(height: 14),
             const Align(
               alignment: Alignment.centerLeft,
-              child: Text('Listeden bitki seç', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+              child: Text('Bitki ekle', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+            ),
+            const SizedBox(height: 4),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Hazır listeden seç ya da en az 3 harf yazıp tüm bitkilerde ara.',
+                style: TextStyle(fontSize: 12, color: GL.muted),
+              ),
             ),
             const SizedBox(height: 10),
             TextField(
-              onChanged: (v) => setState(() => _q = v.trim().toLowerCase()),
+              autofocus: false,
+              onChanged: _onChanged,
               decoration: InputDecoration(
-                hintText: 'Örn. orkide, aloe…',
+                hintText: 'Örn. orkide, lavanta, begonya…',
                 prefixIcon: const Icon(Icons.search_rounded),
+                suffixIcon: _searching
+                    ? const Padding(
+                        padding: EdgeInsets.all(14),
+                        child: SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: GL.forest),
+                        ),
+                      )
+                    : null,
                 filled: true,
                 fillColor: GL.bg,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
@@ -207,20 +274,53 @@ class _CarePickerState extends State<_CarePicker> {
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: ListView.separated(
-                itemCount: items.length,
-                separatorBuilder: (_, __) => const Divider(height: 1, color: GL.mintSoft),
-                itemBuilder: (_, i) {
-                  final c = items[i];
-                  return ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                    leading: SizedBox(width: 44, child: AnimatedPlant(kind: c.kind, leaves: 3, size: 40, sway: false)),
-                    title: Text(c.trName, style: const TextStyle(fontWeight: FontWeight.w700)),
-                    subtitle: Text('${c.scientific} · Su: ${c.waterText}', style: const TextStyle(fontSize: 12)),
-                    trailing: const Icon(Icons.add_circle_rounded, color: GL.forest),
-                    onTap: () => Navigator.pop(context, c),
-                  );
-                },
+              child: ListView(
+                children: [
+                  if (local.isNotEmpty) const _Header('Türkçe bakım rehberi hazır'),
+                  for (final c in local)
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      leading: SizedBox(
+                        width: 44,
+                        child: AnimatedPlant(kind: c.kind, leaves: 3, size: 40, sway: false),
+                      ),
+                      title: Text(c.trName, style: const TextStyle(fontWeight: FontWeight.w700)),
+                      subtitle: Text('${c.scientific} · Su: ${c.waterText}', style: const TextStyle(fontSize: 12)),
+                      trailing: const Icon(Icons.add_circle_rounded, color: GL.forest),
+                      onTap: () => Navigator.pop(context, (c, null)),
+                    ),
+                  if (remote.isNotEmpty) const _Header('Tüm bitkiler · iNaturalist'),
+                  for (final h in remote)
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      leading: h.thumbUrl == null
+                          ? const SizedBox(
+                              width: 44,
+                              child: AnimatedPlant(kind: PlantKind.leafy, leaves: 3, size: 40, sway: false),
+                            )
+                          : NetPhoto(h.thumbUrl!, width: 44, height: 44, radius: 12),
+                      title: Text(h.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                      subtitle: Text(h.scientific,
+                          style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
+                      trailing: _adding == h.id
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(strokeWidth: 2.4, color: GL.forest),
+                            )
+                          : const Icon(Icons.add_circle_outline_rounded, color: GL.forest),
+                      onTap: _adding == null ? () => _pickRemote(h) : null,
+                    ),
+                  if (_q.length >= 3 && !_searching && local.isEmpty && remote.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 30),
+                      child: Center(
+                        child: Text('Sonuç yok. Başka bir ad dene ya da internet bağlantını kontrol et.',
+                            textAlign: TextAlign.center, style: TextStyle(color: GL.muted)),
+                      ),
+                    ),
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
           ],
@@ -228,4 +328,16 @@ class _CarePickerState extends State<_CarePicker> {
       ),
     );
   }
+}
+
+class _Header extends StatelessWidget {
+  final String text;
+  const _Header(this.text);
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(4, 12, 4, 4),
+        child: Text(text.toUpperCase(),
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: .8, color: GL.forestMid)),
+      );
 }

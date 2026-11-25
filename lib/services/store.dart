@@ -19,6 +19,9 @@ class AppStore extends ChangeNotifier {
   bool alarmOn = true;
   int alarmHour = 9;
   int alarmMinute = 0;
+  String cityName = 'İstanbul';
+  double cityLat = 41.01;
+  double cityLon = 28.97;
   List<Plant> plants = [];
 
   Future<void> load() async {
@@ -34,6 +37,9 @@ class AppStore extends ChangeNotifier {
       alarmOn = j['alarmOn'] != false;
       alarmHour = (j['alarmHour'] ?? 9) as int;
       alarmMinute = (j['alarmMinute'] ?? 0) as int;
+      cityName = (j['cityName'] ?? cityName) as String;
+      cityLat = ((j['cityLat'] ?? cityLat) as num).toDouble();
+      cityLon = ((j['cityLon'] ?? cityLon) as num).toDouble();
       plants = ((j['plants'] ?? []) as List)
           .map((e) => Plant.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList();
@@ -54,6 +60,9 @@ class AppStore extends ChangeNotifier {
         'alarmOn': alarmOn,
         'alarmHour': alarmHour,
         'alarmMinute': alarmMinute,
+        'cityName': cityName,
+        'cityLat': cityLat,
+        'cityLon': cityLon,
         'plants': plants.map((p) => p.toJson()).toList(),
       }),
     );
@@ -165,6 +174,15 @@ class AppStore extends ChangeNotifier {
     alarmHour = h;
     alarmMinute = m;
     _save(reschedule: true);
+  }
+
+  // ---------- Şehir (hava durumu) ----------
+
+  void setCity(String name, double lat, double lon) {
+    cityName = name;
+    cityLat = lat;
+    cityLon = lon;
+    _save();
   }
 
   // ---------- Örnek veriler ----------

@@ -25,6 +25,26 @@ jobs:
           flutter-version: 3.24.5
           cache: true
 
+      - name: Ücretsiz veri API'lerini kontrol et
+        continue-on-error: true
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request
+          H = {'User-Agent': 'GreenLife-CI'}
+          def get(u):
+              return json.load(urllib.request.urlopen(urllib.request.Request(u, headers=H), timeout=20))
+          t = get('https://api.inaturalist.org/v1/taxa?q=Monstera%20deliciosa&taxon_id=47126&locale=tr&per_page=1')['results'][0]
+          print('iNaturalist:', t['name'], '|', t.get('preferred_common_name'), '|', (t.get('default_photo') or {}).get('medium_url'))
+          a = get('https://api.inaturalist.org/v1/taxa/autocomplete?q=lavanta&taxon_id=47126&locale=tr&per_page=3')['results']
+          print('Arama (lavanta):', [(x['name'], x.get('preferred_common_name'), x['rank']) for x in a])
+          w = get('https://tr.wikipedia.org/api/rest_v1/page/summary/Monstera_deliciosa')
+          print('Vikipedi:', w.get('type'), '|', w.get('extract', '')[:120])
+          m = get('https://api.open-meteo.com/v1/forecast?latitude=41.01&longitude=28.97&current=temperature_2m,relative_humidity_2m&daily=temperature_2m_max&timezone=auto&forecast_days=1')
+          print('Open-Meteo:', m['current'], m['daily'])
+          g = get('https://geocoding-api.open-meteo.com/v1/search?name=Ankara&count=1&language=tr')['results'][0]
+          print('Şehir:', g['name'], g['latitude'], g['longitude'])
+          PY
+
       - name: Android dosyalarını oluştur
         run: flutter create --org com.greenlife --project-name green_life --platforms=android .
 
