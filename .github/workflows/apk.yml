@@ -3,6 +3,7 @@ name: APK derle
 on:
   push:
     branches: [main]
+    paths: ['lib/**', 'test/**', 'pubspec.yaml', 'tool/patch_android.py', '.github/workflows/apk.yml']
   workflow_dispatch:
 
 permissions:
