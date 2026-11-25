@@ -1,5 +1,5 @@
 include: package:flutter_lints/flutter.yaml
 
-linter:
-  rules:
-    deprecated_member_use: false
+analyzer:
+  errors:
+    deprecated_member_use: ignore
