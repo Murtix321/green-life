@@ -24,8 +24,13 @@ class ScanScreen extends StatefulWidget {
 }
 
 class _ScanScreenState extends State<ScanScreen> with TickerProviderStateMixin {
-  late final AnimationController _line =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))..repeat(reverse: true);
+  late final AnimationController _line;
+
+  @override
+  void initState() {
+    super.initState();
+    _line = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))..repeat(reverse: true);
+  }
 
   _Phase _phase = _Phase.idle;
   String? _image;
